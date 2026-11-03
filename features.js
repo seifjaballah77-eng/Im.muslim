@@ -697,4 +697,103 @@ beadRope?.addEventListener('pointermove',e=>{if(beadDragX===null)return;beadRota
 const lastReadBadgeNote=$('#treeMessage');
 if(lastReadBadgeNote)lastReadBadgeNote.title='النشاط محفوظ على هذا الجهاز فقط';
 
+/* Complete the commonly circulated 99-name enumeration while stating its scholarly caveat. */
+const extraDivineNames=[
+['القابض','الذي يقبض الرزق أو الأرواح بحكمته.','تذكر أن الأمر كله بيد الله.'],
+['الباسط','الذي يبسط الرزق والرحمة لمن يشاء.','اشكر السعة ولا تغتر بها.'],
+['الخافض','الذي يخفض من شاء بعدله وحكمته.','اترك التكبر والظلم.'],
+['الرافع','الذي يرفع من شاء بالطاعة والفضل.','اطلب الرفعة بالإيمان والعمل الصالح.'],
+['المعز','الذي يمنح العزة لمن يشاء.','اطلب العزة بطاعة الله.'],
+['المذل','الذي يذل من شاء بعدله.','احذر البغي والغرور.'],
+['الحكم','الذي يحكم بالحق ولا معقب لحكمه.','ارضَ بحكم الله.'],
+['العدل','المنزه عن الظلم، الذي يضع الأمور مواضعها.','الزم العدل مع الناس.'],
+['المقيت','الحافظ الموصل أقوات الخلق، على ما فسره أهل العلم.','توكل على الله في الرزق.'],
+['الحسيب','الكافي لعباده والمحاسب لهم.','حاسب نفسك قبل الحساب.'],
+['الجليل','العظيم الجليل القدر.','أجِلّ الله في قلبك.'],
+['الباعث','الذي يبعث الخلق يوم القيامة.','استعد للبعث والعمل الصالح.'],
+['الشهيد','المطلع الذي لا يغيب عنه شيء.','استقم في السر والعلن.'],
+['الحق','الثابت الذي لا شك في وجوده ووعده.','تمسك بالحق.'],
+['المحصي','الذي أحصى كل شيء عدداً وعلماً.','راقب أعمالك.'],
+['المبدئ','الذي بدأ الخلق وأنشأهم.','تأمل بداية الخلق.'],
+['المعيد','الذي يعيد الخلق بعد الموت.','تذكر الرجوع إلى الله.'],
+['المحيي','الذي يهب الحياة.','اشكر نعمة الحياة.'],
+['المميت','الذي يقدر الموت على خلقه.','استعد للقاء الله.'],
+['الواجد','الغني الذي لا يفتقر إلى شيء، في شرح الاسم الوارد في القائمة المشهورة.','استشعر غنى الله عن العالمين.'],
+['الماجد','العظيم الشريف كثير الإحسان.','أكثر من الثناء على الله.'],
+['المقتدر','كامل القدرة الذي لا يعجزه شيء.','لا تيأس من فرج الله.'],
+['المقدم','الذي يقدم من شاء بحكمته.','سل الله التوفيق وحسن السبق إلى الخير.'],
+['المؤخر','الذي يؤخر من شاء بحكمته.','اصبر على تأخر ما ترجوه.'],
+['الظاهر','العالي الذي ليس فوقه شيء، والظاهر بآياته.','تدبر دلائل قدرة الله.'],
+['الباطن','القريب المحيط الذي لا يحجبه شيء.','أخلص النية لله.'],
+['الوالي','المتولي تدبير الخلق.','فوّض أمرك إلى الله.'],
+['المتعالي','المتنزه عن صفات النقص.','نزّه الله وعظّمه.'],
+['البر','كثير الإحسان واللطف.','أحسن إلى الخلق.'],
+['التواب','الذي يوفق عباده للتوبة ويقبلها.','بادر بالتوبة.'],
+['المنتقم','الذي ينتقم من الظالمين بعدله.','لا تظلم ولا تيأس من عدل الله.'],
+['العفو','الذي يمحو الذنوب ويتجاوز عن السيئات.','اسأل الله العفو واعفُ عن الناس.'],
+['الرؤوف','شديد الرأفة بعباده.','ارفق بالخلق.'],
+['مالك الملك','المالك لكل الملك والمتصرف فيه.','لا تتعلق بزينة الدنيا.'],
+['ذو الجلال والإكرام','صاحب العظمة والكمال والإنعام.','اجمع بين التعظيم والرجاء.'],
+['المقسط','العادل الذي يقيم القسط.','أقم العدل ولو على نفسك.'],
+['الجامع','الذي يجمع الخلق ليوم لا ريب فيه.','استعد ليوم الجمع.'],
+['الغني','المستغني عن جميع خلقه.','استغنِ بالله عما في أيدي الناس.'],
+['المغني','الذي يغني من يشاء من فضله.','اسأل الله الكفاية.'],
+['المانع','الذي يمنع بحكمته ما يشاء.','ثق بحكمة المنع والعطاء.'],
+['الضار النافع','الذي يقدر الضر والنفع، ولا يقع شيء إلا بإذنه.','لا تتعلق بالأسباب وحدها.'],
+['البديع','الذي أبدع الخلق على غير مثال سابق.','تأمل بديع صنع الله.'],
+['الباقي','الدائم الذي لا يلحقه فناء.','اعمل لما يبقى.'],
+['الوارث','الباقي بعد فناء الخلق، وإليه يرجع الملك.','تذكر أن ما في أيدينا أمانة.'],
+['الرشيد','الذي يرشد عباده ويدبر الأمر بحكمة.','اطلب الرشد والهداية.'],
+['الصبور','الذي لا يعاجل العصاة بالعقوبة، على ما ورد في القائمة المشهورة.','تحلَّ بالصبر والحلم.']
+];
+const presentNames=new Set(divineNames.map(x=>x[0]));
+extraDivineNames.forEach(x=>{if(!presentNames.has(x[0])){divineNames.push(x);presentNames.add(x[0])}});
+if(typeof renderDivineNames==='function')renderDivineNames();
+const namesNote=$('#namesList .feature-note');
+if(namesNote)namesNote.innerHTML='هذه مجموعة مستفادة من القوائم المتداولة مع معانٍ موجزة للتقريب. اختلف أهل العلم في تعيين الأسماء التسعة والتسعين وصحة سرد الترمذي اسماً اسماً؛ فلا تُجعل القائمة حداً لأسماء الله. <a href="https://www.islamweb.net/ar/fatwa/12383/" target="_blank" rel="noopener">اقرأ بيان الخلاف والمصدر</a>.';
+/* Optional quick radial access, not a replacement for the side navigation. */
+if(!$('#quickFab'))document.body.insertAdjacentHTML('beforeend','<div id="quickFabMenu"><button data-quick-open="tasbih">المسبحة السريعة</button><button data-quick-open="qibla">اتجاه القبلة</button><button data-quick-open="adhkar">دعاء وأذكار</button></div><button id="quickFab" aria-label="الأدوات السريعة">✧</button>');
+$('#quickFab')?.addEventListener('click',()=>$('#quickFabMenu').classList.toggle('open'));
+$('#quickFabMenu')?.addEventListener('click',e=>{const b=e.target.closest('[data-quick-open]');if(!b)return;$('#quickFabMenu').classList.remove('open');window.openSection(b.dataset.quickOpen)});
+/* Halal food search is optional and based on OSM tags, not a certification guarantee. */
+const mosqueCard=$('#nearbyMosquesBtn')?.closest('.feature-card');
+if(mosqueCard)mosqueCard.insertAdjacentHTML('beforeend','<div class="feature-actions"><button id="nearbyHalalBtn" class="feature-btn">مطاعم مذكور أنها حلال</button></div><div id="nearbyHalalList" class="mosque-list"></div><p class="feature-note">الوسم على الخريطة ليس شهادة اعتماد حلال؛ تحقق من المطعم مباشرة.</p>');
+$('#nearbyHalalBtn')?.addEventListener('click',async()=>{
+ const out=$('#nearbyHalalList');out.innerHTML='<p class="muted">جارٍ البحث…</p>';
+ let c=window.userCoords||null;
+ if(!c&&navigator.geolocation){try{const p=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:12000}));c={lat:p.coords.latitude,lon:p.coords.longitude}}catch(e){}}
+ if(!c){out.textContent='اسمح بالموقع للبحث عن المطاعم القريبة.';return}
+ const q='[out:json][timeout:25];(node["amenity"="restaurant"]["diet:halal"="yes"](around:5000,'+c.lat+','+c.lon+');way["amenity"="restaurant"]["diet:halal"="yes"](around:5000,'+c.lat+','+c.lon+');node["cuisine"~"halal",i](around:5000,'+c.lat+','+c.lon+');way["cuisine"~"halal",i](around:5000,'+c.lat+','+c.lon+'););out center tags;';
+ try{const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(q)});if(!r.ok)throw Error();const rows=(await r.json()).elements||[],list=rows.map(x=>{const lat=x.lat??x.center?.lat,lon=x.lon??x.center?.lon;if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;return {name:x.tags?.name||'مطعم بدون اسم مسجل',lat,lon,km:haversine(c.lat,c.lon,lat,lon)}}).filter(Boolean).sort((a,b)=>a.km-b.km).slice(0,12);
+ out.innerHTML=list.length?list.map(x=>'<div class="mosque-item"><b></b><br><small></small><br><a target="_blank" rel="noopener">فتح الاتجاهات</a></div>').join(''):'لا توجد مطاعم بوسم حلال ضمن نطاق 5 كم في بيانات الخريطة.';
+ list.forEach((x,i)=>{const el=out.children[i];el.querySelector('b').textContent=x.name;el.querySelector('small').textContent=x.km.toFixed(2)+' كم تقريباً';el.querySelector('a').href='https://www.google.com/maps/dir/?api=1&destination='+x.lat+','+x.lon});
+ }catch(e){out.textContent='تعذر الوصول إلى بيانات الخريطة حالياً.'}
+});
+/* A lightweight, approximate pitch indicator; it is not a Tajweed assessment. */
+if($('#recitationStatus')&&!$('#voicePitch'))$('#recitationStatus').insertAdjacentHTML('afterend','<div id="voicePitch" class="feature-note">طبقة الصوت التقريبية: —</div>');
+async function startMicMeter(){
+ try{
+  if(!navigator.mediaDevices?.getUserMedia)throw Error();
+  micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  const C=window.AudioContext||window.webkitAudioContext;micContext=new C();
+  const src=micContext.createMediaStreamSource(micStream);micAnalyser=micContext.createAnalyser();micAnalyser.fftSize=2048;src.connect(micAnalyser);
+  const data=new Float32Array(micAnalyser.fftSize),sampleRate=micContext.sampleRate;
+  const draw=()=>{
+   micAnalyser.getFloatTimeDomainData(data);let sum=0;for(const v of data)sum+=v*v;
+   const rms=Math.sqrt(sum/data.length),level=Math.min(100,rms*260);
+   if($('#voiceMeterFill'))$('#voiceMeterFill').style.width=level+'%';
+   let pitch='—';
+   if(rms>.012){
+    const minLag=Math.max(2,Math.floor(sampleRate/500)),maxLag=Math.min(data.length/2,Math.floor(sampleRate/70));
+    let best=-1,bestLag=0;
+    for(let lag=minLag;lag<=maxLag;lag++){let corr=0;for(let i=0;i<data.length-lag;i+=3)corr+=data[i]*data[i+lag];if(corr>best){best=corr;bestLag=lag}}
+    if(bestLag)pitch=Math.round(sampleRate/bestLag)+' Hz';
+   }
+   if($('#voicePitch'))$('#voicePitch').textContent='طبقة الصوت التقريبية: '+pitch+' · لا تقيس صحة التلاوة أو التجويد';
+   micFrame=requestAnimationFrame(draw);
+  };draw();
+ }catch(e){if($('#recitationStatus'))$('#recitationStatus').textContent='لم يسمح المتصفح باستخدام الميكروفون أو لا يدعمه.'}
+}
+/* Calm breathing glow in Focus Mode. */
+
 })();
