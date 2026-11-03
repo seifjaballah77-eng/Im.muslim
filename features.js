@@ -893,10 +893,10 @@ const duas=[{c:'الكرب',t:'لا إله إلا الله العظيم الحل
 function renderDuas(){const q=($('#duaSearch')?.value||'').trim();$('#duaLibrary').innerHTML=duas.filter(x=>(x.c+x.t+x.s).includes(q)).map(x=>'<div class="feature-item"><small>'+x.c+' · '+x.s+'</small><p class="arabic">'+x.t+'</p><button class="feature-btn" data-copy-dua="'+duas.indexOf(x)+'">نسخ الدعاء</button></div>').join('')||'<p class="muted">لا توجد نتائج.</p>'}
 renderDuas();$('#duaSearch')?.addEventListener('input',renderDuas);$('#duaLibrary')?.addEventListener('click',e=>{const b=e.target.closest('[data-copy-dua]');if(b)navigator.clipboard?.writeText(duas[Number(b.dataset.copyDua)].t)});
 // 6) Qiyam reminder while this page remains open.
-let qiyamTimer=null;
+let qiyamTimer=null,lastQiyamNotice='';
 $('#saveQiyam')?.addEventListener('click',async()=>{const time=$('#qiyamTime').value;if(!time)return;hubStore.set('qiyam',time);if('Notification'in window&&Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}
 if(qiyamTimer)clearInterval(qiyamTimer);
-qiyamTimer=setInterval(()=>{const now=new Date();if(now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')===time){if('Notification'in window&&Notification.permission==='granted')new Notification('تذكير قيام الليل',{body:'حان وقت التذكير الذي اخترته.'});else alert('تذكير قيام الليل: '+time);}},20000);
+qiyamTimer=setInterval(()=>{const now=new Date();const today=now.toLocaleDateString('en-CA');if(now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')===time&&lastQiyamNotice!==today){lastQiyamNotice=today;if('Notification'in window&&Notification.permission==='granted')new Notification('تذكير قيام الليل',{body:'حان وقت التذكير الذي اخترته.'});else alert('تذكير قيام الليل: '+time);}},20000);
 $('#qiyamStatus').textContent='تم حفظ التذكير. سيعمل أثناء بقاء هذه الصفحة مفتوحة فقط؛ المتصفح لا يضمنه بعد الإغلاق.'});
 if(hubStore.get('qiyam'))$('#qiyamTime').value=hubStore.get('qiyam');
 // 7) Tajweed bite-sized lessons.
@@ -906,7 +906,7 @@ $('#tajweedLessons').innerHTML=tajweed.map((x,i)=>'<details class="lesson-detail
 const history=[['مولد النبي ﷺ','عام الفيل؛ ويذكر المؤرخون 570 أو 571م على اختلاف الروايات.'],['بدء الوحي','نحو 610م في غار حراء.'],['الهجرة النبوية','622م؛ بداية التأريخ الهجري.'],['غزوة بدر','2 هـ.'],['فتح مكة','8 هـ.'],['حجة الوداع','10 هـ.']];
 $('#historyTimeline').innerHTML=history.map(x=>'<div class="feature-item"><b>'+x[0]+'</b><p>'+x[1]+'</p></div>').join('');
 // 9) Personal sadaqah log.
-function renderSadaqah(){const rows=hubStore.get('sadaqah',[]);$('#sadaqahList').innerHTML=rows.map((x,i)=>'<div class="feature-item"><b>'+x.amount+'</b> · '+safeText(x.note)+'<small> · '+x.date+'</small> <button class="feature-btn" data-del-sadaqah="'+i'">حذف</button></div>').join('')||'<p class="muted">لم تسجل صدقات بعد.</p>'}
+function renderSadaqah(){const rows=hubStore.get('sadaqah',[]);$('#sadaqahList').innerHTML=rows.map((x,i)=>'<div class="feature-item"><b>'+x.amount+'</b> · '+safeText(x.note)+'<small> · '+x.date+'</small> <button class="feature-btn" data-del-sadaqah="'+i+'">حذف</button></div>').join('')||'<p class="muted">لم تسجل صدقات بعد.</p>'}
 $('#addSadaqah')?.addEventListener('click',()=>{const amount=Number($('#sadaqahAmount').value),note=$('#sadaqahNote').value.trim();if(!(amount>0)){alert('أدخل مبلغاً صحيحاً.');return}const rows=hubStore.get('sadaqah',[]);rows.unshift({amount,note,date:new Date().toLocaleDateString('ar')});hubStore.set('sadaqah',rows);$('#sadaqahAmount').value='';$('#sadaqahNote').value='';renderSadaqah()});
 $('#sadaqahList')?.addEventListener('click',e=>{const b=e.target.closest('[data-del-sadaqah]');if(!b)return;const a=hubStore.get('sadaqah',[]);a.splice(Number(b.dataset.delSadaqah),1);hubStore.set('sadaqah',a);renderSadaqah()});renderSadaqah();
 // 10) Travel prayer guidance is intentionally cautious and does not issue a fatwa.
