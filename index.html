@@ -79,7 +79,7 @@ const $=s=>document.querySelector(s);const $$=s=>document.querySelectorAll(s);
 function toast(s){const t=$('#toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2300)}
 function setDrawer(opened){$('#sidebar').classList.toggle('open',opened);$('#drawerShade').classList.toggle('show',opened);$('#menuToggle').setAttribute('aria-expanded',String(opened));$('#drawerHandle').setAttribute('aria-expanded',String(opened));$('#drawerHandle').classList.toggle('hidden',opened)}
 function openSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.side-link').forEach(x=>x.classList.toggle('active',x.dataset.open===id));setDrawer(false);window.scrollTo({top:0,behavior:'smooth'});if(id==='quran'&&!window.surahsLoaded)loadSurahs();if(id==='calendar')loadHijri()}
-$('[data-open]').forEach(b=>b.addEventListener('click',()=>openSection(b.dataset.open)));
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openSection(b.dataset.open)));
 $('#menuToggle').onclick=()=>setDrawer(!$('#sidebar').classList.contains('open'));
 $('#drawerHandle').onclick=()=>setDrawer(!$('#sidebar').classList.contains('open'));
 $('#drawerShade').onclick=()=>setDrawer(false);
