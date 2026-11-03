@@ -40,7 +40,6 @@ extraNav.forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.
 all('.feature-page [data-open]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.open)));
 const homeTiles=$('.tiles');
 if(homeTiles)homeTiles.insertAdjacentHTML('beforeend','<button class="tile" data-go="prayer"><span class="ico">◷</span><span>الصلاة والأذان</span></button><button class="tile" data-go="library"><span class="ico">▤</span><span>المكتبة</span></button><button class="tile" data-go="favorites"><span class="ico">♡</span><span>المفضلة</span></button><button class="tile" data-go="tools"><span class="ico">✧</span><span>الأدوات</span></button>');
-all('[data-go]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.go)));
 const homePrayer=$('#prayerTimes')?.closest('.card');
 if(homePrayer)homePrayer.insertAdjacentHTML('beforeend','<div class="countdown-box"><div><div class="muted" id="homeNextLabel">الصلاة القادمة</div><div class="countdown-time" id="prayerCountdownHome">--:--:--</div></div><button class="feature-btn" data-go="prayer">إعدادات الصلاة</button></div>');
 all('[data-go]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.go)));
@@ -85,7 +84,7 @@ $('#playFullSurah')?.addEventListener('click',()=>{if(!activeSurah)return toast(
 $('#surahContent')?.addEventListener('click',e=>{
  const p=e.target.closest('[data-play-ayah]');if(p){e.stopPropagation();const i=Number(p.dataset.playAyah)-1,a=audioMap[i];if(!a?.number)return toast('تعذر تحديد ملف التلاوة');player.src=a.audio||('https://cdn.islamic.network/quran/audio/128/'+audioEdition+'/'+a.number+'.mp3');player.play().catch(()=>toast('اضغط تشغيل داخل المشغل'));return}
  const t=e.target.closest('[data-tafsir-ayah]');if(t){e.stopPropagation();showTafsir(activeSurah,Number(t.dataset.tafsirAyah))}
-});
+},true);
 async function showTafsir(s,a){const p=$('#tafsirPanel');p.hidden=false;p.textContent='جارٍ تحميل التفسير الميسر…';try{const r=await fetch(api+'/ayah/'+s+':'+a+'/ar.muyassar');if(!r.ok)throw Error();const j=await r.json();p.innerHTML='<b>التفسير الميسر · '+s+':'+a+'</b><p></p><small>للتدبر، ولا يغني عن سؤال أهل العلم.</small>';p.querySelector('p').textContent=j.data.text}catch(e){p.textContent='تعذر تحميل التفسير حالياً.'}}
 $('#topicSearchToggle')?.addEventListener('click',()=>{$('#quranSearchPanel').hidden=!$('#quranSearchPanel').hidden;$('#quranSearchInput').focus()});
 async function searchQuran(){const q=$('#quranSearchInput').value.trim(),out=$('#quranSearchResults');if(!q)return;out.innerHTML='<p class="muted">جارٍ البحث…</p>';try{const r=await fetch(api+'/search/'+encodeURIComponent(q)+'/all/ar');if(!r.ok)throw Error();const rows=(await r.json()).data.matches||[];out.innerHTML=rows.length?rows.slice(0,40).map(x=>'<div class="feature-item"><p class="arabic"></p><small></small><button class="feature-btn" data-result-s="'+x.surah.number+'" data-result-a="'+x.numberInSurah+'">افتح الآية</button></div>').join(''):'<p class="muted">لا توجد نتائج.</p>';rows.slice(0,40).forEach((x,i)=>{out.children[i].querySelector('p').textContent=x.text;out.children[i].querySelector('small').textContent=x.surah.name+' · الآية '+x.numberInSurah})}catch(e){out.innerHTML='<p class="muted">تعذر البحث. تحقق من الاتصال.</p>'}}
@@ -146,7 +145,7 @@ $('#countBtn').onclick=function(e){if(originalCount)originalCount.call(this,e);i
 /* Activity log, streak and heatmap. */
 const dayKey=()=>new Date().toLocaleDateString('en-CA');
 async function addStat(kind,n){const log=await readLocal('activityLog',{}),d=dayKey();if(!log[d])log[d]={verses:0,tasbih:0,adhkar:0};log[d][kind]=(log[d][kind]||0)+n;await saveLocal('activityLog',log)}
-const oldProgress=window.updateDailyProgress;if(typeof oldProgress==='function')window.updateDailyProgress=function(){oldProgress();addStat('verses',0)};
+const oldProgress=window.updateDailyProgress;if(typeof oldProgress==='function')window.updateDailyProgress=function(){oldProgress();readLocal('activityLog',{}).then(log=>{const d=dayKey();if(!log[d])log[d]={verses:0,tasbih:0,adhkar:0};log[d].verses=Number(dailyReadCount)||0;saveLocal('activityLog',log)})};
 async function renderStats(){
  const log=await readLocal('activityLog',{}),read=await readLocal('dailyReadVerses',[]),d=dayKey(),x=log[d]||{};
  $('#statsVerses').textContent=Array.isArray(read)?read.length:0;$('#statsTasbih').textContent=x.tasbih||0;$('#statsAdhkar').textContent=x.adhkar||0;
