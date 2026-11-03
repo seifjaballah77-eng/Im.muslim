@@ -84,7 +84,7 @@ body:before{background:#28c78a;top:10%;right:-130px}body:after{background:#d8b56
 @media(max-width:720px){.mobile-dock{position:fixed;z-index:6;bottom:0;left:0;right:0;display:flex;justify-content:space-around;gap:4px;padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:#071b18ed;border-top:1px solid var(--line);backdrop-filter:blur(14px)}.mobile-dock button{flex:1;min-width:0;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--muted);font-size:10px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:3px}.mobile-dock button span{font-size:20px;color:var(--gold)}.mobile-dock button.active{background:#1b382d;border-color:#8f713d;color:#f4d995}.app{padding-bottom:100px}}
 :root[data-theme="light"] .mobile-dock{background:#fffdf6ed}
 :root[data-theme="oled"] .mobile-dock{background:#000}
-</style></head>
+</style><link rel="stylesheet" href="./features.css"></head>
 <body><div class="toast" id="toast"></div><div class="drawer-shade" id="drawerShade"></div><button class="drawer-handle" id="drawerHandle" aria-label="اسحب لفتح القائمة" aria-controls="sidebar" aria-expanded="false"><span>‹</span><small>القائمة</small></button><aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
   <div class="side-brand"><div class="logo">۞</div><div><b>i-Muslim</b><small>رفيق المسلم في كل يوم</small></div></div>
   <div class="side-label">القائمة الرئيسية</div>
@@ -193,4 +193,4 @@ if('serviceWorker'in navigator){
 window.addEventListener('load',async()=>{try{const registration=await navigator.serviceWorker.register('./sw.js');$('#updateStatus').textContent='التطبيق مسجل للعمل دون اتصال.';registration.addEventListener('updatefound',()=>{const worker=registration.installing;if(worker)worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller){$('#updateStatus').textContent='يتوفر تحديث جديد. أعد تحميل التطبيق لتطبيقه.';toast('يتوفر تحديث جديد للتطبيق')}})});$('#checkUpdateBtn').onclick=async()=>{try{await registration.update();$('#updateStatus').textContent='تم فحص التحديثات.';toast('اكتمل فحص التحديثات')}catch(e){$('#updateStatus').textContent='تعذر فحص التحديثات. تحقق من الاتصال.'}}}catch(e){$('#updateStatus').textContent='تعذر تسجيل وضع العمل دون اتصال.'}});
 }
 getGeo();
-</script></body></html>
+</script><script src="./features.js"></script></body></html>
