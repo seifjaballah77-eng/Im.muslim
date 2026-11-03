@@ -43,8 +43,7 @@ if(homeTiles)homeTiles.insertAdjacentHTML('beforeend','<button class="tile" data
 document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go){e.preventDefault();window.openSection(go.dataset.go)}},true);
 const homePrayer=$('#prayerTimes')?.closest('.card');
 if(homePrayer)homePrayer.insertAdjacentHTML('beforeend','<div class="countdown-box"><div><div class="muted" id="homeNextLabel">الصلاة القادمة</div><div class="countdown-time" id="prayerCountdownHome">--:--:--</div></div><button class="feature-btn" data-go="prayer">إعدادات الصلاة</button></div>');
-all('[data-go]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.go)));
-/* Core navigation translations. */
+/* Core navigation translations are handled through delegated clicks. */
 const dict={
 ar:{home:'الرئيسية',quran:'القرآن الكريم',adhkar:'الأذكار والأدعية',qibla:'اتجاه القبلة',tasbih:'المسبحة الإلكترونية',hadith:'الحديث الشريف',learn:'تعلم العبادات',names:'أسماء الله الحسنى',calendar:'التقويم الهجري',settings:'الإعدادات',prayer:'الصلاة والأذان',library:'المكتبة الإسلامية',favorites:'المفضلة',tools:'أدوات المسلم',seasons:'المواسم الإسلامية',stats:'إنجازاتي'},
 fr:{home:'Accueil',quran:'Coran',adhkar:'Invocations',qibla:'Direction Qibla',tasbih:'Chapelet',hadith:'Hadith',learn:'Rites',names:'Noms d’Allah',calendar:'Calendrier hégirien',settings:'Paramètres',prayer:'Prière et Adhan',library:'Bibliothèque',favorites:'Favoris',tools:'Outils',seasons:'Saisons islamiques',stats:'Mes progrès'},
@@ -286,6 +285,7 @@ async function savePreciseBookmark(){
  await saveLocal('lastRead',mark);refreshContinueCard();toast('تم حفظ السورة والآية والصفحة');
 }
 $('#saveBookmarkBtn')?.removeEventListener('click',bookmark);
+$('#saveBookmarkBtn')?.removeEventListener('click',savePreciseBookmark);
 $('#saveBookmarkBtn')?.addEventListener('click',savePreciseBookmark);
 refreshContinueCard();
 /* Prayer interval progress and edge glow at the actual prayer time. */
@@ -483,7 +483,7 @@ $('#knowledgeActions')?.addEventListener('click',async e=>{
  }
  if(action==='read'&&d.kind==='verse'){
   const key=d.surah+':'+d.ayah;if(!dailyReadVerses.includes(key))dailyReadVerses.push(key);
-  dailyReadCount=dailyReadVerses.length;await saveLocal('dailyReadDate',todayKey);await saveLocal('dailyReadVerses',dailyReadVerses);updateDailyProgress();await addStat('verses',dailyReadCount);toast('تم تسجيل الآية ضمن ورد اليوم');
+  dailyReadCount=dailyReadVerses.length;await saveLocal('dailyReadDate',todayKey);await saveLocal('dailyReadVerses',dailyReadVerses);updateDailyProgress();toast('تم تسجيل الآية ضمن ورد اليوم');
  }
  if(action==='favorite'&&d.kind==='verse'){
   const fav=await readLocal('favoriteVerses',[]);if(!fav.some(x=>x.surah===d.surah&&Number(x.ayah)===Number(d.ayah))){fav.push({text:d.text,surah:d.surah,ayah:d.ayah});await saveLocal('favoriteVerses',fav)}toast('حُفظت الآية في المفضلة');renderFavorites();
@@ -602,7 +602,7 @@ $('#startRecitation')?.addEventListener('click',()=>{
  rec.onresult=e=>{
   let spoken='';for(let i=0;i<e.results.length;i++)spoken+=e.results[i][0].transcript+' ';
   const tokens=normalizeArabic(spoken),container=$('#recitationTranscript');container.innerHTML='';
-  const matched=new Set(tokens);recitationWords.forEach(w=>{const span=document.createElement('span');span.textContent=w+' ';span.className=matched.has(w)?'voice-correct':'voice-pending';container.appendChild(span)});
+  let cursor=0;recitationWords.forEach(w=>{const span=document.createElement('span');span.textContent=w+' ';const at=tokens.indexOf(w,cursor);if(at>=0){span.className='voice-correct';cursor=at+1}else if(cursor<tokens.length){span.className='voice-wrong';cursor++}else span.className='voice-pending';container.appendChild(span)});
   const hits=recitationWords.filter(w=>matched.has(w)).length;$('#recitationStatus').textContent='مطابقة تقريبية للكلمات: '+hits+' / '+recitationWords.length+'. راجع النص بنفسك، فالتعرف الصوتي قد يخطئ.';
  };
  rec.onerror=()=>$('#recitationStatus').textContent='تعذر التعرف على الصوت؛ تحقق من إذن الميكروفون والاتصال.';
@@ -658,7 +658,7 @@ refreshPrayer=function(){
  const keys=['Fajr','Dhuhr','Asr','Maghrib','Isha'],i=keys.indexOf(t.key),prev=keys[(i+4)%5],[ph,pm]=timings[prev].split(':').map(Number);
  const start=new Date(t.date);start.setHours(ph,pm,0,0);if(prev==='Isha'&&t.key==='Fajr')start.setDate(start.getDate()-1);
  const pct=Math.max(0,Math.min(100,(Date.now()-start)/Math.max(1,t.date-start)*100)),q=pct/100;
- const x=18+224*q,y=55-81*q*(1-q)*4/1.0;
+ const x=18+224*q,y=55-162*q*(1-q);
  ['prayerCountdown','prayerCountdownHome'].forEach(id=>{
   const dot=$('#'+id+'SunDot'),path=$('#'+id+'SunArc .sun-path');
   if(dot){dot.setAttribute('cx',x.toFixed(1));dot.setAttribute('cy',y.toFixed(1))}
