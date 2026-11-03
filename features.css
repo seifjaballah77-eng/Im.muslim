@@ -157,3 +157,22 @@ body[data-time-theme="العشاء"]{--gold:#c7b0ff}
 :root[data-theme="oled"] .knowledge-sheet{background:#030303}
 @media(max-width:520px){.knowledge-sheet{padding-left:13px;padding-right:13px}.sheet-actions button{font-size:12px;padding:9px 7px}.badge-grid{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.knowledge-sheet,.daily-flip,.ripple-touch:after{animation:none!important;transition:none!important}}
+
+.audio-sync{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;background:var(--panel2)}
+.audio-sync small{display:block;color:var(--muted);font-size:10px;margin-bottom:6px}
+#audioSyncLine{font-size:18px;line-height:2.1}
+.audio-word-active{color:var(--gold);text-shadow:0 0 12px var(--gold);border-bottom:2px solid var(--gold);font-weight:bold}
+.camera-radar-wrap{position:relative;border-radius:14px;overflow:hidden;background:#000;margin-top:12px}
+.camera-radar-wrap video{display:block;width:100%;max-height:42vh;object-fit:cover}
+.camera-qibla-overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:#fff1c2;font-size:62px;text-shadow:0 0 12px #d8b56d,0 0 28px #d8b56d;background:#071b1877;border:1px solid #d8b56d99;pointer-events:none}
+#qiblaCamera[style*="display: none"]+.camera-qibla-overlay{display:none}
+body.focus-reading #readerTools{opacity:0;pointer-events:none;max-height:0;overflow:hidden;margin:0;padding:0;border:0}
+body.focus-reading #surahReaderView{max-width:860px;margin:auto}
+body.focus-reading #surahContent{font-size:1.15em}
+#festiveBanner{position:relative;overflow:hidden}
+#festiveBanner:after{content:"☾";position:absolute;left:20px;top:-22px;font-size:100px;color:#d8b56d20;pointer-events:none}
+.daily-face{isolation:isolate}
+.daily-face:after{content:"۞";position:absolute;z-index:-1;left:50%;top:50%;transform:translate(-50%,-50%);font-size:190px;color:#d8b56d12}
+.feature-card:focus-within,.feature-item:focus-within{border-color:var(--gold)}
+body[data-festival="friday"] .hero{border-color:#6d9e76;box-shadow:0 0 18px #479b6040}
+body[data-festival="ramadan"] .hero,body[data-festival="eid"] .hero{border-color:#d8b56d;box-shadow:0 0 22px #d8b56d25}
