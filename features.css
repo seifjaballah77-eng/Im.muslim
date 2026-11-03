@@ -209,7 +209,7 @@ body.mosque-mode .card,body.mosque-mode .feature-card{box-shadow:none!important}
 body.mosque-mode{background:var(--bg)}
 body.serenity-mode .sidebar,body.serenity-mode .top,body.serenity-mode .bottom,body.serenity-mode .drawer-handle,body.serenity-mode .hero{display:none!important}
 body.serenity-mode .app{padding-top:8vh}
-body.serenity-mode #hub .hub-grid{display:none}
+body.serenity-mode #hub .hub-grid .feature-card:not(:last-child){display:none}
 body.serenity-mode #hub .section-head{display:none}
 body.serenity-mode #serenityVerse{font-size:clamp(28px,5vw,52px);padding:15vh 5vw;line-height:2.1;color:var(--gold)}
 @media(max-width:720px){.hub-grid{grid-template-columns:1fr}.juz-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
