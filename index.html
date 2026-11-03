@@ -107,7 +107,7 @@ async function saveLocal(key,value){try{const db=await openLocalDB();await new P
 async function readLocal(key,fallback=null){try{const db=await openLocalDB();const value=await new Promise((resolve,reject)=>{const req=db.transaction('kv','readonly').objectStore('kv').get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});if(value!==undefined)return value}catch(e){}try{const raw=localStorage.getItem('imuslim-'+key);return raw===null?fallback:JSON.parse(raw)}catch(e){return fallback}}
 function applyTheme(theme){if(theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',theme);const labels={auto:'تلقائي',dark:'داكن',light:'فاتح'};$('#themeBtn').textContent='المظهر: '+labels[theme];$('#themeSelect').value=theme;try{localStorage.setItem('imuslim-theme',theme)}catch(e){}saveLocal('theme',theme)}
 let currentTheme='auto';try{currentTheme=localStorage.getItem('imuslim-theme')||'auto'}catch(e){}applyTheme(currentTheme);
-$('#themeBtn').onclick=()=>applyTheme(({auto:'dark',dark:'light',light:'auto'})[currentTheme=({auto:'dark',dark:'light',light:'auto'})[currentTheme]||'auto']);
+$('#themeBtn').onclick=()=>{currentTheme=({auto:'dark',dark:'light',light:'auto'})[currentTheme]||'auto';applyTheme(currentTheme)};
 $('#themeSelect').addEventListener('change',e=>{currentTheme=e.target.value;applyTheme(currentTheme)});
 readLocal('theme',currentTheme).then(value=>{if(['auto','dark','light'].includes(value)&&value!==currentTheme){currentTheme=value;applyTheme(value)}});
 readLocal('count',0).then(value=>{count=Number(value)||0;$('#count').textContent=count});
