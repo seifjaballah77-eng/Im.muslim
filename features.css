@@ -58,3 +58,43 @@
 :root[data-theme="light"] .feature-card{background:linear-gradient(145deg,#fffdf6,#f3f0e5)}
 :root[data-theme="light"] .feature-input,:root[data-theme="light"] .feature-select,:root[data-theme="light"] .feature-item{background:#f5f2e8}
 :root[data-theme="oled"] .feature-card,:root[data-theme="oled"] .feature-item{background:#050505}
+
+/* Additional requested polish */
+.daily-flip-wrap{perspective:1100px;margin:12px 0}
+.daily-flip{position:relative;min-height:190px;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.2,.75,.2,1);cursor:pointer}
+.daily-flip.flipped{transform:rotateY(180deg)}
+.daily-face{position:absolute;inset:0;min-height:190px;backface-visibility:hidden;border:1px solid #b89b5c;border-radius:19px;padding:20px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(145deg,#173b30,#10251f 65%,#302719);box-shadow:0 14px 34px #0003}
+.daily-face.back{transform:rotateY(180deg);background:linear-gradient(145deg,#302719,#15382d);color:var(--text)}
+.daily-face .arabic{font-size:25px;line-height:2.1;color:#fff8e8}
+.daily-face small{color:var(--gold);margin-top:8px}
+.daily-flip-button{margin-top:11px}
+.prayer-progress-track{height:9px;border-radius:99px;overflow:hidden;background:var(--line);margin-top:12px}
+.prayer-progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7f9e65,#d8b56d);transition:width .8s ease}
+.prayer-progress-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted)}
+body.prayer-edge-glow:after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;border:3px solid var(--gold);border-radius:20px;box-shadow:inset 0 0 35px #d8b56d55,0 0 30px #d8b56d44;animation:edge-pulse 2.8s ease-out both}
+@keyframes edge-pulse{0%{opacity:0}16%{opacity:.9}100%{opacity:0}}
+body[data-stars="on"] #starLayer{display:block}
+#starLayer{display:none;position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.38;background-image:radial-gradient(1px 1px at 8% 16%,#fff 60%,transparent 100%),radial-gradient(1px 1px at 27% 73%,#fff 60%,transparent 100%),radial-gradient(2px 2px at 44% 24%,#d8b56d 60%,transparent 100%),radial-gradient(1px 1px at 68% 62%,#fff 60%,transparent 100%),radial-gradient(1px 1px at 87% 33%,#fff 60%,transparent 100%),radial-gradient(1px 1px at 92% 84%,#d8b56d 60%,transparent 100%);background-size:100% 100%;animation:star-twinkle 7s ease-in-out infinite alternate}
+@keyframes star-twinkle{from{opacity:.15;filter:brightness(.75)}to{opacity:.48;filter:brightness(1.4)}}
+body[data-glass="on"] .card,body[data-glass="on"] .feature-card,body[data-glass="on"] .sidebar{background:linear-gradient(145deg,#ffffff12,#ffffff05);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-color:#d8b56d66;box-shadow:0 12px 35px #0002}
+body[data-glass="on"] .tile,body[data-glass="on"] .feature-item{background:#ffffff0b;backdrop-filter:blur(12px)}
+#quickFab{position:fixed;z-index:30;left:18px;bottom:24px;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:linear-gradient(145deg,#d8b56d,#9b773c);color:#14251d;font-size:25px;box-shadow:0 8px 25px #0005;display:grid;place-items:center}
+#quickFabMenu{position:fixed;z-index:29;left:18px;bottom:88px;display:none;gap:8px}
+#quickFabMenu.open{display:grid}
+#quickFabMenu button{border:1px solid var(--gold);border-radius:99px;padding:10px 15px;background:var(--panel);color:var(--text);box-shadow:0 6px 18px #0004}
+.daily-flip-wrap .daily-face{overflow:hidden}
+.quiz-card{margin-top:12px}
+.quiz-question{font-size:23px;line-height:2.1;text-align:center;color:var(--gold);padding:12px}
+.quiz-options{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.quiz-options input{max-width:180px}
+.topic-chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.topic-chips button{border:1px solid var(--line);border-radius:99px;padding:8px 12px;background:var(--panel2);color:var(--text)}
+.mosque-list{display:grid;gap:8px;margin-top:10px}
+.mosque-item{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:12px;line-height:1.7}
+.mosque-item a{color:var(--gold)}
+.travel-result{border:1px solid var(--accent2);background:#d8b56d12;padding:12px;border-radius:13px;margin-top:10px;line-height:1.9}
+.accent-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-left:7px}
+.ambient-toggle[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+:root[data-theme="light"] .daily-face{color:#fff}
+:root[data-theme="oled"] .daily-face{background:#030303}
+@media(max-width:720px){#quickFab{bottom:88px;left:12px;width:51px;height:51px}#quickFabMenu{bottom:147px;left:12px}}
