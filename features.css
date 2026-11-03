@@ -98,3 +98,62 @@ body[data-glass="on"] .tile,body[data-glass="on"] .feature-item{background:#ffff
 :root[data-theme="light"] .daily-face{color:#fff}
 :root[data-theme="oled"] .daily-face{background:#030303}
 @media(max-width:720px){#quickFab{bottom:88px;left:12px;width:51px;height:51px}#quickFabMenu{bottom:147px;left:12px}}
+
+/* Universal explain sheet */
+.knowledge-shade{position:fixed;inset:0;z-index:80;background:#0009;backdrop-filter:blur(5px);opacity:1}
+.knowledge-sheet{position:fixed;z-index:81;left:0;right:0;bottom:0;max-height:min(84vh,780px);overflow:auto;padding:12px 18px calc(18px + env(safe-area-inset-bottom));background:linear-gradient(155deg,#17362c,#0a1d18 75%);border:1px solid #b99654;border-bottom:0;border-radius:24px 24px 0 0;box-shadow:0 -20px 70px #0007;animation:sheet-rise .26s cubic-bezier(.2,.75,.2,1) both}
+.knowledge-sheet[hidden],.knowledge-shade[hidden]{display:none!important}
+.sheet-grab{width:45px;height:5px;border-radius:9px;background:#d8b56d88;margin:1px auto 13px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sheet-head h2{font-size:20px;margin:8px 0}
+.sheet-tabs{display:flex;gap:7px;overflow:auto;padding:12px 0;border-bottom:1px solid var(--line)}
+.sheet-tabs button{white-space:nowrap;border:1px solid var(--line);border-radius:99px;padding:8px 13px;background:var(--panel2);color:var(--text);font-size:12px}
+.sheet-tabs button.active{border-color:var(--gold);color:var(--gold);background:#d8b56d15}
+.sheet-body{min-height:130px;padding:13px 2px;line-height:2}
+.sheet-body h3{color:var(--gold);font-size:16px;margin:5px 0}
+.sheet-prose{font-size:16px;line-height:2}
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.sheet-actions button{flex:1}
+.sheet-open{overflow:hidden}
+@keyframes sheet-rise{from{transform:translateY(100%);opacity:.7}to{transform:translateY(0);opacity:1}}
+/* Tactile ripple */
+button,.tile,.feature-card,.feature-item{position:relative;overflow:hidden}
+.ripple-touch:after{content:"";position:absolute;left:var(--ripple-x,50%);top:var(--ripple-y,50%);width:8px;height:8px;border-radius:50%;background:#d8b56d55;transform:translate(-50%,-50%) scale(0);animation:ripple-spread .45s ease-out;pointer-events:none}
+@keyframes ripple-spread{to{transform:translate(-50%,-50%) scale(22);opacity:0}}
+/* Prayer sun arc */
+.sun-arc{width:100%;height:60px;display:block;margin-top:9px;overflow:visible}
+.sun-arc path{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round}
+.sun-arc .sun-path{stroke:var(--gold);stroke-width:2;opacity:.9}
+.sun-arc circle{fill:var(--gold);filter:drop-shadow(0 0 6px var(--gold))}
+body[data-festival="friday"] .festive-banner,body[data-festival="ramadan"] .festive-banner,body[data-festival="eid"] .festive-banner{border-color:var(--gold);box-shadow:0 0 24px #d8b56d20}
+body[data-festival="ramadan"],body[data-festival="eid"]{background-image:radial-gradient(ellipse at 15% 10%,#d8b56d18,transparent 40%)}
+.festive-banner{margin:12px 0 16px}
+.festive-banner h3{margin:8px 0;color:var(--gold)}
+/* 3D tasbih */
+.bead-rope{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:340px;margin:20px auto 10px;perspective:650px;transition:transform .25s}
+.bead{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 32% 27%,#eff6d4,#5f8c72 35%,#1c4737 72%);border:1px solid #a9ca9a;box-shadow:inset -3px -3px 5px #0006,0 2px 5px #0005;transform:translateZ(0);transition:all .2s}
+.bead.lit{background:radial-gradient(circle at 30% 25%,#fff4cf,#e3c374 38%,#9d7133 78%);box-shadow:0 0 12px #d8b56d88,inset -2px -2px 5px #0004;transform:translateY(-3px) scale(1.12)}
+/* Tree and achievement badges */
+.tree-achievement{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:105px;margin-bottom:12px}
+.tree-crown{width:72px;height:66px;display:grid;place-items:center;border-radius:50%;font-size:40px;color:#d8b56d;background:radial-gradient(circle at 35% 30%,#a9d5a1,#3a774b 58%,#18442e);box-shadow:0 0 25px #65ac7955;transition:all .5s}
+.tree-trunk{width:11px;height:27px;background:linear-gradient(90deg,#5b3925,#ba8653,#593820);border-radius:5px}
+.badge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.badge-item{border:1px solid var(--line);border-radius:13px;padding:11px;display:grid;gap:4px;background:var(--panel2)}
+.badge-item b{color:var(--gold)}
+.badge-item small{color:var(--muted);line-height:1.6}
+.badge-item span{font-size:11px}
+.badge-item.locked{opacity:.48;filter:saturate(.5)}
+.badge-item.earned{border-color:#c5a65f;box-shadow:0 0 12px #d8b56d20}
+.voice-correct{color:#72e0a0;background:#1d713c33;border-radius:5px;padding:2px 3px}
+.voice-pending{color:var(--muted);padding:2px 3px}
+.voice-meter{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:10px 0}
+.voice-meter>div{height:100%;width:0;background:linear-gradient(90deg,#3eaf79,#d8b56d);transition:width .08s}
+.focus-reading .knowledge-sheet,.focus-reading .knowledge-shade{opacity:0}
+body[data-time-theme="الفجر"]{--mint:#b5d8ce}
+body[data-time-theme="النهار"]{--mint:#b8dfbd}
+body[data-time-theme="المغرب"]{--gold:#efb879}
+body[data-time-theme="العشاء"]{--gold:#c7b0ff}
+:root[data-theme="light"] .knowledge-sheet{background:linear-gradient(155deg,#fffdf6,#ece6d8);color:#24372c}
+:root[data-theme="oled"] .knowledge-sheet{background:#030303}
+@media(max-width:520px){.knowledge-sheet{padding-left:13px;padding-right:13px}.sheet-actions button{font-size:12px;padding:9px 7px}.badge-grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.knowledge-sheet,.daily-flip,.ripple-touch:after{animation:none!important;transition:none!important}}
