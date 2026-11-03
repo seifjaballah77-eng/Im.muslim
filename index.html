@@ -21,6 +21,7 @@
 .side-footer{margin-top:auto;border-top:1px solid var(--line);padding:15px 7px 3px;color:var(--muted);font-size:11px}
 .side-footer span{color:var(--gold);font-size:17px;margin-left:6px}
 .menu-toggle{display:none}
+.drawer-handle{display:none}
 .drawer-shade{display:none}
 .bottom{display:none}
 @media(max-width:720px){
@@ -29,10 +30,14 @@
 .sidebar.open{transform:translateX(0)}
 .drawer-shade.show{display:block;position:fixed;inset:0;background:#0009;z-index:7}
 .menu-toggle{display:inline-block}
+.drawer-handle{display:flex;position:fixed;z-index:6;right:0;top:48%;transform:translateY(-50%);width:31px;height:82px;border:1px solid #a98545;border-right:0;border-radius:13px 0 0 13px;background:linear-gradient(180deg,#244b3b,#10271f);color:#f0d18b;align-items:center;justify-content:center;flex-direction:column;gap:3px;box-shadow:0 5px 18px #0005}
+.drawer-handle span{font-size:28px;line-height:22px}
+.drawer-handle small{font-size:9px;writing-mode:vertical-rl}
+.drawer-handle.hidden{opacity:0;pointer-events:none;transform:translate(100%,-50%)}
 .grid{grid-template-columns:1fr 1fr}.wide,.half{grid-column:span 2}.tiles{grid-template-columns:repeat(2,1fr)}.prayer-list{grid-template-columns:repeat(5,minmax(0,1fr))}.prayer{padding:8px 2px}.prayer b{font-size:12px}.app{padding:13px 12px 95px}.hero h2{font-size:21px}.navbtn{min-width:0;flex:1;padding:9px 3px;font-size:11px}.bottom{gap:3px}}
 @media(max-width:390px){.prayer span{font-size:10px}.prayer b{font-size:11px}.top-actions .smallbtn{padding:8px}}
 </style></head>
-<body><div class="toast" id="toast"></div><div class="drawer-shade" id="drawerShade"></div><aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
+<body><div class="toast" id="toast"></div><div class="drawer-shade" id="drawerShade"></div><button class="drawer-handle" id="drawerHandle" aria-label="اسحب لفتح القائمة" aria-controls="sidebar" aria-expanded="false"><span>‹</span><small>القائمة</small></button><aside class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
   <div class="side-brand"><div class="logo">۞</div><div><b>i-Muslim</b><small>رفيق المسلم في كل يوم</small></div></div>
   <div class="side-label">القائمة الرئيسية</div>
   <nav class="side-nav">
@@ -72,10 +77,13 @@
 <script>
 const $=s=>document.querySelector(s);const $$=s=>document.querySelectorAll(s);
 function toast(s){const t=$('#toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2300)}
-function openSection(id){$('.section').forEach(x=>x.classList.toggle('active',x.id===id));$('.side-link').forEach(x=>x.classList.toggle('active',x.dataset.open===id));$('#sidebar').classList.remove('open');$('#drawerShade').classList.remove('show');$('#menuToggle').setAttribute('aria-expanded','false');window.scrollTo({top:0,behavior:'smooth'});if(id==='quran'&&!window.surahsLoaded)loadSurahs();if(id==='calendar')loadHijri()}
+function openSection(id){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.side-link').forEach(x=>x.classList.toggle('active',x.dataset.open===id));$('#sidebar').classList.remove('open');$('#drawerShade').classList.remove('show');$('#menuToggle').setAttribute('aria-expanded','false');$('#drawerHandle').classList.remove('hidden');$('#drawerHandle').setAttribute('aria-expanded','false');window.scrollTo({top:0,behavior:'smooth'});if(id==='quran'&&!window.surahsLoaded)loadSurahs();if(id==='calendar')loadHijri()}
 $('[data-open]').forEach(b=>b.addEventListener('click',()=>openSection(b.dataset.open)));
 $('#menuToggle').onclick=()=>{const opened=$('#sidebar').classList.toggle('open');$('#drawerShade').classList.toggle('show',opened);$('#menuToggle').setAttribute('aria-expanded',String(opened))};
-$('#drawerShade').onclick=()=>{$('#sidebar').classList.remove('open');$('#drawerShade').classList.remove('show');$('#menuToggle').setAttribute('aria-expanded','false')};
+function toggleDrawer(){const opened=$('#sidebar').classList.toggle('open');$('#drawerShade').classList.toggle('show',opened);$('#menuToggle').setAttribute('aria-expanded',String(opened));$('#drawerHandle').setAttribute('aria-expanded',String(opened));$('#drawerHandle').classList.toggle('hidden',opened)}
+$('#drawerHandle').onclick=toggleDrawer;
+
+$('#drawerShade').onclick=()=>{$('#sidebar').classList.remove('open');$('#drawerShade').classList.remove('show');$('#menuToggle').setAttribute('aria-expanded','false');$('#drawerHandle').setAttribute('aria-expanded','false');$('#drawerHandle').classList.remove('hidden')};
 
 $('#themeBtn').onclick=()=>{document.body.classList.toggle('light');if(document.body.classList.contains('light')){document.documentElement.style.setProperty('--bg','#f3f0e5');document.documentElement.style.setProperty('--panel','#fffdf6');document.documentElement.style.setProperty('--panel2','#e8eee5');document.documentElement.style.setProperty('--text','#183329');document.documentElement.style.setProperty('--muted','#52685c');document.documentElement.style.setProperty('--line','#c9d6c9')}else{['--bg','--panel','--panel2','--text','--muted','--line'].forEach((v,i)=>document.documentElement.style.removeProperty(v))}};
 let count=Number(localStorage.getItem('imuslim-count')||0);$('#count').textContent=count;$('#countBtn').onclick=()=>{count++;$('#count').textContent=count;localStorage.setItem('imuslim-count',count)};$('#resetCount').onclick=()=>{count=0;$('#count').textContent=0;localStorage.setItem('imuslim-count',0)};
