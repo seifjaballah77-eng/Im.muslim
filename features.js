@@ -526,7 +526,7 @@ const namesBox=$('#namesList');
 if(namesBox){
  namesBox.innerHTML='<p class="feature-note">أسماء مختارة وردت في القرآن والسنة، مع معانٍ تقريبية وأثر إيماني للتدبر. في تعيين القائمة المشهورة للأسماء الحسنى وجمعها خلاف بين أهل العلم؛ فلا تُعرض هذه المجموعة باعتبارها حصراً نهائياً.</p><input id="divineSearch" class="feature-input" placeholder="ابحث عن اسم أو معنى..."><div id="divineNamesGrid" class="feature-grid"></div>';
  function renderDivineNames(){const q=$('#divineSearch').value.trim();const rows=divineNames.filter(n=>n.join(' ').includes(q));$('#divineNamesGrid').innerHTML=rows.map((n,i)=>'<button class="feature-card divine-name" data-divine="'+i+'"><span class="feature-kpi"></span><small>اضغط لفهم الاسم</small></button>').join('');rows.forEach((n,i)=>$('#divineNamesGrid').children[i].querySelector('.feature-kpi').textContent=n[0]);}
- $('#divineSearch').addEventListener('input',renderDivineNames);renderDivineNames();
+ $('#divineSearch').addEventListener('input',renderDivineNames);renderDivineNames();window.imuslimDivineNames=divineNames;window.imuslimRenderDivineNames=renderDivineNames;
  $('#divineNamesGrid').addEventListener('click',e=>{const b=e.target.closest('[data-divine]');if(!b)return;const n=divineNames.find(x=>x[0]===b.querySelector('.feature-kpi').textContent);if(!n)return;sheetOpen({kind:'name',title:n[0],source:'معنى تقريبي للتدبر',text:n[0],meaning:n[1],note:'أثر إيماني مقترح: '+n[2]});$('#knowledgeTabs [data-sheet-tab="words"]').hidden=true;$('#knowledgeTabs [data-sheet-tab="reason"]').textContent='الأثر الإيماني';$('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="copy">نسخ</button>'});
 }
 /* Seasonal engine: Friday, Ramadan and the two Eid days use local Hijri date. */
@@ -746,9 +746,10 @@ const extraDivineNames=[
 ['الرشيد','الذي يرشد عباده ويدبر الأمر بحكمة.','اطلب الرشد والهداية.'],
 ['الصبور','الذي لا يعاجل العصاة بالعقوبة، على ما ورد في القائمة المشهورة.','تحلَّ بالصبر والحلم.']
 ];
-const presentNames=new Set(divineNames.map(x=>x[0]));
-extraDivineNames.forEach(x=>{if(!presentNames.has(x[0])){divineNames.push(x);presentNames.add(x[0])}});
-if(typeof renderDivineNames==='function')renderDivineNames();
+const sharedNames=window.imuslimDivineNames||[];
+const presentNames=new Set(sharedNames.map(x=>x[0]));
+extraDivineNames.forEach(x=>{if(!presentNames.has(x[0])){sharedNames.push(x);presentNames.add(x[0])}});
+if(typeof window.imuslimRenderDivineNames==='function')window.imuslimRenderDivineNames();
 const namesNote=$('#namesList .feature-note');
 if(namesNote)namesNote.innerHTML='هذه مجموعة مستفادة من القوائم المتداولة مع معانٍ موجزة للتقريب. اختلف أهل العلم في تعيين الأسماء التسعة والتسعين وصحة سرد الترمذي اسماً اسماً؛ فلا تُجعل القائمة حداً لأسماء الله. <a href="https://www.islamweb.net/ar/fatwa/12383/" target="_blank" rel="noopener">اقرأ بيان الخلاف والمصدر</a>.';
 /* Optional quick radial access, not a replacement for the side navigation. */
