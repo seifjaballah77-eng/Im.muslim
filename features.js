@@ -2,7 +2,7 @@
 'use strict';
 const $=s=>document.querySelector(s), all=s=>document.querySelectorAll(s), api='https://api.alquran.cloud/v1';
 const nav=$('.side-nav');
-const items=[['prayer','الصلاة والأذان','◷'],['library','المكتبة الإسلامية','▤'],['favorites','المفضلة','♡'],['tools','أدوات المسلم','✧'],['seasons','المواسم الإسلامية','☾'],['stats','إنجازاتي','▥']];
+const items=[['prayer','الصلاة والأذان','◷'],['library','المكتبة الإسلامية','▤'],['favorites','المفضلة','♡'],['tools','أدوات المسلم','✧'],['seasons','المواسم الإسلامية','☾'],['stats','إنجازاتي','▥'],['games','ألعاب التدبر','◇'],['prohibitions','موسوعة المحرمات','⚖']];
 items.forEach(x=>nav.insertAdjacentHTML('beforeend','<button class="side-link" data-open="'+x[0]+'"><span>'+x[2]+'</span>'+x[1]+'</button>'));
 const pages=`
 <section id="prayer" class="section feature-page"><button class="smallbtn back" data-open="home">← الرئيسية</button><div class="section-head"><div><h2>الصلاة والأذان</h2><p class="muted">مواقيت قابلة لاختيار المدينة وطريقة الحساب.</p></div></div><div class="feature-grid">
@@ -33,7 +33,14 @@ const pages=`
 <article class="feature-card"><h3>خطة ختمة شخصية</h3><label>عدد الأيام</label><input id="khatmaDays" class="feature-input" type="number" min="1" max="365" value="30"><button id="makeKhatma" class="feature-btn primary">احسب الورد</button><p id="khatmaResult" class="feature-note"></p></article>
 <article class="feature-card"><h3>الإمساك والإفطار</h3><p>تعرض صفحة الصلاة الفجر والمغرب بحسب موقعك وطريقة الحساب. راجع إمساكية الجهة الرسمية في منطقتك.</p><button class="feature-btn" data-open="prayer">مواقيت الصلاة</button></article></div></section>
 <section id="stats" class="section feature-page"><button class="smallbtn back" data-open="home">← الرئيسية</button><div class="section-head"><div><h2>إنجازاتي ووردي</h2><p class="muted">إحصائيات على هذا الجهاز فقط؛ ليست عداداً عالمياً.</p></div><button class="feature-btn" id="refreshStats">تحديث</button></div><div class="feature-grid">
-<div class="feature-card"><h3>آيات اليوم</h3><div class="feature-kpi" id="statsVerses">0</div></div><div class="feature-card"><h3>التسبيح اليوم</h3><div class="feature-kpi" id="statsTasbih">0</div></div><div class="feature-card"><h3>الأذكار المكتملة اليوم</h3><div class="feature-kpi" id="statsAdhkar">0</div></div><div class="feature-card"><h3>أيام متتالية</h3><div class="feature-kpi" id="statsStreak">0</div></div></div><div class="feature-card" style="margin-top:12px"><h3>نشاط آخر 7 أيام</h3><div id="weekBars" class="week-bars"></div><h3 style="margin-top:20px">خريطة النشاط – 30 يوماً</h3><div id="activityHeatmap" class="heatmap"></div><p class="feature-note">البيانات محلية ولا تتم مزامنتها عبر الأجهزة.</p></div></section>`;
+<div class="feature-card"><h3>آيات اليوم</h3><div class="feature-kpi" id="statsVerses">0</div></div><div class="feature-card"><h3>التسبيح اليوم</h3><div class="feature-kpi" id="statsTasbih">0</div></div><div class="feature-card"><h3>الأذكار المكتملة اليوم</h3><div class="feature-kpi" id="statsAdhkar">0</div></div><div class="feature-card"><h3>أيام متتالية</h3><div class="feature-kpi" id="statsStreak">0</div></div></div><div class="feature-card" style="margin-top:12px"><h3>نشاط آخر 7 أيام</h3><div id="weekBars" class="week-bars"></div><h3 style="margin-top:20px">خريطة النشاط – 30 يوماً</h3><div id="activityHeatmap" class="heatmap"></div><p class="feature-note">البيانات محلية ولا تتم مزامنتها عبر الأجهزة.</p></div></section>
+<section id="games" class="section feature-page"><button class="smallbtn back" data-open="home">← الرئيسية</button><div class="section-head"><div><h2>ألعاب الأجر والتدبر</h2><p class="muted">أنشطة للتعلم والمراجعة؛ لا يمكن الجزم بأن نقاط اللعبة تعني حسنات.</p></div></div><div class="feature-grid">
+<article class="feature-card game-card"><h3>ترتيب كلمات الآية</h3><p class="feature-note">رتّب كلمات الآية القصيرة لتراجع حفظك.</p><div id="ayahPuzzle" class="game-options"></div><div class="feature-actions"><button id="checkAyahPuzzle" class="feature-btn primary">تحقق من الترتيب</button><button id="shuffleAyahPuzzle" class="feature-btn">إعادة الخلط</button></div><p id="ayahPuzzleResult" class="feature-note" aria-live="polite"></p><small class="muted">الإخلاص: ١</small></article>
+<article class="feature-card game-card"><h3>معاني الكلمات القرآنية</h3><p id="vocabQuestion" class="arabic"></p><div id="vocabOptions" class="game-options"></div><p id="vocabResult" class="feature-note" aria-live="polite"></p><button id="nextVocab" class="feature-btn">سؤال آخر</button></article>
+<article class="feature-card game-card"><h3>بطاقات السيرة النبوية</h3><p id="seerahQuestion"></p><div id="seerahOptions" class="game-options"></div><p id="seerahResult" class="feature-note" aria-live="polite"></p><button id="nextSeerah" class="feature-btn">بطاقة أخرى</button></article>
+<article class="feature-card game-card"><h3>وصّل الاسم بمعناه</h3><p class="feature-note">اختر المعنى الصحيح للاسم.</p><p id="nameMatchQuestion" class="arabic"></p><div id="nameMatchOptions" class="game-options"></div><p id="nameMatchResult" class="feature-note" aria-live="polite"></p><button id="nextNameMatch" class="feature-btn">اسم آخر</button></article>
+</div></section>
+<section id="prohibitions" class="section feature-page"><button class="smallbtn back" data-open="home">← الرئيسية</button><div class="section-head"><div><h2>موسوعة المحرمات والمحظورات</h2><p class="muted">مدخل تعليمي مختصر بأدلة قرآنية واضحة، وليس بديلاً عن سؤال أهل العلم في النوازل.</p></div></div><div class="feature-card"><div class="prohibition-categories" id="prohibitionCategories"></div><div class="feature-list" id="prohibitionList"></div></div><div id="prohibitionDetail" class="prohibition-detail" hidden role="dialog" aria-modal="true" aria-labelledby="prohibitionTitle"><div class="prohibition-dialog"><button id="closeProhibition" class="feature-btn">إغلاق ✕</button><h3 id="prohibitionTitle"></h3><div id="prohibitionBody"></div></div></div></section>`;
 $('.app').insertAdjacentHTML('beforeend',pages);
 const extraNav=all('.side-link').length>10?[...all('.side-link')].slice(10):[];
 extraNav.forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.open)));
@@ -795,6 +802,52 @@ async function startMicMeter(){
   };draw();
  }catch(e){if($('#recitationStatus'))$('#recitationStatus').textContent='لم يسمح المتصفح باستخدام الميكروفون أو لا يدعمه.'}
 }
+
+// Interactive learning games: educational practice, not a promise of spiritual reward.
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+const puzzleWords=['قُلْ','هُوَ','اللَّهُ','أَحَدٌ'];
+function renderPuzzle(){const host=$('#ayahPuzzle');if(!host)return;host.innerHTML='';shuffle(puzzleWords).forEach((w,i)=>{const b=document.createElement('button');b.className='game-choice';b.textContent=w;b.dataset.word=w;b.title='اضغط لنقل الكلمة إلى آخر الترتيب';b.addEventListener('click',()=>host.appendChild(b));host.appendChild(b)})}
+renderPuzzle();
+$('#shuffleAyahPuzzle')?.addEventListener('click',()=>{renderPuzzle();$('#ayahPuzzleResult').textContent=''});
+$('#checkAyahPuzzle')?.addEventListener('click',()=>{const got=[...$('#ayahPuzzle').children].map(x=>x.dataset.word);$('#ayahPuzzleResult').textContent=got.join('|')===puzzleWords.join('|')?'أحسنت! الترتيب صحيح. سورة الإخلاص، الآية 1.':'ليس هذا ترتيب الآية بعد؛ حاول مرة أخرى.'});
+const vocabItems=[{w:'أَفُول',q:['الغياب والزوال','الزيادة والنماء','السفر'],a:0,ex:'ورد وصف الشمس بالأفول في سورة الأنعام (76)، أي غيابها وزوالها.'},{w:'حَصُورًا',q:['كثير المال','ممتنعاً عن الشهوات، كما فسره أهل التفسير','شديد السرعة'],a:1,ex:'وصف يحيى عليه السلام في آل عمران (39)، وللمفسرين تفصيل في تفسيره.'}];
+let vocabIndex=0;
+function renderVocab(){const x=vocabItems[vocabIndex%vocabItems.length];$('#vocabQuestion').textContent='ما معنى: '+x.w+'؟';$('#vocabOptions').innerHTML=x.q.map((v,i)=>'<button class="game-choice" data-vocab="'+i+'">'+v+'</button>').join('');$('#vocabResult').textContent='';}
+renderVocab();
+$('#vocabOptions')?.addEventListener('click',e=>{const b=e.target.closest('[data-vocab]');if(!b)return;const x=vocabItems[vocabIndex%vocabItems.length];$('#vocabResult').textContent=Number(b.dataset.vocab)===x.a?'صحيح. '+x.ex:'ليست الإجابة الصحيحة. '+x.ex});
+$('#nextVocab')?.addEventListener('click',()=>{vocabIndex++;renderVocab()});
+const seerahItems=[{q:'في أي مدينة هاجر النبي ﷺ وأقام الدولة الإسلامية؟',o:['الطائف','المدينة المنورة','بيت المقدس'],a:1,e:'هاجر النبي ﷺ إلى يثرب، وسميت المدينة النبوية.'},{q:'ما اسم الغار الذي نزل فيه الوحي أول مرة؟',o:['غار حراء','غار ثور','غار أحد'],a:0,e:'كان بدء الوحي في غار حراء.'},{q:'في أي سنة هجرية وقعت غزوة بدر؟',o:['السنة الثانية','السنة الخامسة','السنة الثامنة'],a:0,e:'وقعت بدر الكبرى في رمضان من السنة الثانية للهجرة.'}];
+let seerahIndex=0;
+function renderSeerah(){const x=seerahItems[seerahIndex%seerahItems.length];$('#seerahQuestion').textContent=x.q;$('#seerahOptions').innerHTML=x.o.map((v,i)=>'<button class="game-choice" data-seerah="'+i+'">'+v+'</button>').join('');$('#seerahResult').textContent='';}
+renderSeerah();
+$('#seerahOptions')?.addEventListener('click',e=>{const b=e.target.closest('[data-seerah]');if(!b)return;const x=seerahItems[seerahIndex%seerahItems.length];$('#seerahResult').textContent=Number(b.dataset.seerah)===x.a?'إجابة صحيحة. '+x.e:'الإجابة الصحيحة: '+x.o[x.a]+'. '+x.e});
+$('#nextSeerah')?.addEventListener('click',()=>{seerahIndex++;renderSeerah()});
+const nameMatches=[{n:'الرَّحْمٰن',o:['واسع الرحمة','العليم بكل شيء','الخالق'],a:0},{n:'السَّمِيع',o:['الذي يرزق الخلق','الذي يسمع جميع الأصوات','الغفور'],a:1},{n:'الغَفُور',o:['الذي يغفر الذنوب','الذي يحيي الموتى','الذي يخلق'],a:0}];
+let nameIndex=0;
+function renderNameMatch(){const x=nameMatches[nameIndex%nameMatches.length];$('#nameMatchQuestion').textContent=x.n;$('#nameMatchOptions').innerHTML=x.o.map((v,i)=>'<button class="game-choice" data-name-match="'+i+'">'+v+'</button>').join('');$('#nameMatchResult').textContent='';}
+renderNameMatch();
+$('#nameMatchOptions')?.addEventListener('click',e=>{const b=e.target.closest('[data-name-match]');if(!b)return;const x=nameMatches[nameIndex%nameMatches.length];$('#nameMatchResult').textContent=Number(b.dataset.nameMatch)===x.a?'صحيح. أحسنت في المراجعة.':'حاول مرة أخرى؛ راجع معنى الاسم.'});
+$('#nextNameMatch')?.addEventListener('click',()=>{nameIndex++;renderNameMatch()});
+// Prohibition entries: concise definitions, direct Quranic evidence, impact and repentance guidance.
+const prohibitions=[
+{cat:'اللسان والقلب',n:'الغيبة',d:'ذكر المسلم أخاه بما يكره في غيبته، ولو كان الوصف فيه.',e:'قال تعالى: «ولا يغتب بعضكم بعضاً» (الحجرات: 12).',h:'تهدم الثقة وتؤذي الروابط الاجتماعية.',t:'التوبة بالإقلاع والندم والعزم على عدم العودة، مع إصلاح الضرر. ومسألة إخبار من اغتيب أو طلب مسامحته فيها تفصيل بين أهل العلم بحسب المصلحة ودفع مفسدة أكبر.'},
+{cat:'اللسان والقلب',n:'النميمة',d:'نقل الكلام بين الناس بقصد الإفساد أو بما يؤدي إلى الشحناء.',e:'ثبت في الصحيحين الوعيد في النميمة؛ صحيح البخاري وصحيح مسلم، كتاب الإيمان.',h:'تزرع العداوة وتقطع المودة.',t:'ترك النقل، والندم، وإصلاح ما أمكن من الخصومة دون إشعالها.'},
+{cat:'اللسان والقلب',n:'الكذب',d:'الإخبار بخلاف الواقع عمداً.',e:'قال تعالى: «إن الله لا يهدي من هو مسرف كذاب» (غافر: 28).',h:'يفقد الناس الثقة ويوقع في الظلم وضياع الحقوق.',t:'التوقف والندم والعزم على الصدق، وتصحيح الخبر ورد الحقوق إن ترتب عليه ضرر.'},
+{cat:'المال والمعاملات',n:'الربا',d:'معاملة مالية محرمة لها صور وأحكام تفصيلية يبينها أهل الاختصاص.',e:'قال تعالى: «وأحل الله البيع وحرم الربا» (البقرة: 275).',h:'يوقع في أكل المال بالباطل والاستغلال.',t:'إيقاف المعاملة المحرمة، والندم، وسؤال عالم موثوق عن كيفية التخلص من آثار العقد والحقوق؛ فالتفاصيل تختلف باختلاف الصورة.'},
+{cat:'المال والمعاملات',n:'الغش في البيع',d:'إخفاء العيب أو التدليس أو تقديم معلومات مضللة للمشتري.',e:'قال رسول الله ﷺ: «من غش فليس مني» (صحيح مسلم، 102).',h:'يضيّع الحقوق ويقوض الثقة في المعاملات.',t:'التوقف، ورد الحق أو تعويض المتضرر، وبيان العيب حيث يلزم.'},
+{cat:'المال والمعاملات',n:'أكل مال اليتيم ظلماً',d:'الاستيلاء على مال اليتيم أو التصرف فيه بغير حق.',e:'قال تعالى: «إن الذين يأكلون أموال اليتامى ظلماً إنما يأكلون في بطونهم ناراً» (النساء: 10).',h:'اعتداء على ضعيف وماله ومستقبله.',t:'رد المال إلى صاحبه أو وليه الشرعي، والندم والتوبة، والاستعانة بالقضاء أو أهل الاختصاص عند تعذر الرد.'},
+{cat:'الأخلاق والعلاقات',n:'عقوق الوالدين',d:'إيذاء الوالدين أو الإساءة إليهما أو تضييع حقوقهما الواجبة.',e:'قال تعالى: «فلا تقل لهما أف ولا تنهرهما» (الإسراء: 23).',h:'يؤذي الأسرة ويقطع البر والإحسان.',t:'التوبة، والاعتذار والإحسان، ورد المظالم، مع عدم طاعة أحد في معصية الخالق.'},
+{cat:'الأكل والشرب',n:'الخمر والمسكرات',d:'كل ما أسكر العقل يدخل في باب المسكرات المحرمة.',e:'قال تعالى: «إنما الخمر والميسر والأنصاب والأزلام رجس من عمل الشيطان فاجتنبوه» (المائدة: 90).',h:'تضر العقل والصحة والأسرة وقد تقود إلى أضرار أخرى.',t:'الإقلاع وطلب الدعم الطبي أو العلاجي عند الاعتماد، مع التوبة وعدم اليأس من رحمة الله.'},
+{cat:'الأكل والشرب',n:'الميتة ولحم الخنزير',d:'أطعمة نص القرآن على تحريمها، مع استثناءات الضرورة المنضبطة شرعاً.',e:'قال تعالى: «حرمت عليكم الميتة والدم ولحم الخنزير» (المائدة: 3).',h:'امتثال أمر الله وحفظ الطهارة والالتزام بأحكام الطعام.',t:'التوبة إن وقع ذلك عن علم وتعمد، ومعرفة أحكام الضرورة من أهل العلم.'}
+];
+const cats=['الكل',...new Set(prohibitions.map(x=>x.cat))];let selectedProhibitionCat='الكل';
+function renderProhibitions(){const c=$('#prohibitionCategories'),l=$('#prohibitionList');if(!c||!l)return;c.innerHTML=cats.map(x=>'<button class="feature-btn '+(x===selectedProhibitionCat?'primary':'')+'" data-prohibition-cat="'+x+'">'+x+'</button>').join('');const rows=prohibitions.filter(x=>selectedProhibitionCat==='الكل'||x.cat===selectedProhibitionCat);l.innerHTML=rows.map((x,i)=>'<button class="prohibition-item" data-prohibition="'+prohibitions.indexOf(x)+'"><b>'+x.n+'</b><small>'+x.cat+'</small><span>عرض الدليل والتفصيل ←</span></button>').join('')}
+renderProhibitions();
+$('#prohibitionCategories')?.addEventListener('click',e=>{const b=e.target.closest('[data-prohibition-cat]');if(!b)return;selectedProhibitionCat=b.dataset.prohibitionCat;renderProhibitions()});
+$('#prohibitionList')?.addEventListener('click',e=>{const b=e.target.closest('[data-prohibition]');if(!b)return;const x=prohibitions[Number(b.dataset.prohibition)];$('#prohibitionTitle').textContent=x.n;$('#prohibitionBody').innerHTML='<h4>التعريف المبسط</h4><p>'+x.d+'</p><h4>الدليل الشرعي</h4><p>'+x.e+'</p><h4>الحكمة والآثار</h4><p>'+x.h+'</p><h4>التوبة والإصلاح</h4><p>'+x.t+'</p><p class="feature-note">المادة للتثقيف العام وليست فتوى في واقعة بعينها. تُراجع المسائل التفصيلية مع عالم موثوق.</p>';$('#prohibitionDetail').hidden=false});
+$('#closeProhibition')?.addEventListener('click',()=>$('#prohibitionDetail').hidden=true);
+$('#prohibitionDetail')?.addEventListener('click',e=>{if(e.target.id==='prohibitionDetail')e.currentTarget.hidden=true});
+
 /* Calm breathing glow in Focus Mode. */
 
 })();
