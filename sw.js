@@ -1,4 +1,4 @@
-const CACHE_NAME='i-muslim-shell-v4';
+const CACHE_NAME='i-muslim-shell-v5';
 const API_CACHE='i-muslim-api-v1';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon.svg','./features.css','./features.js'];
 const API_HOSTS=new Set(['api.alquran.cloud','api.aladhan.com']);
