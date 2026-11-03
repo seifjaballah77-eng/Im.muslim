@@ -192,3 +192,24 @@ body[data-festival="ramadan"] .hero,body[data-festival="eid"] .hero{border-color
 .prohibition-dialog h4{color:var(--gold);margin:18px 0 5px}
 .prohibition-dialog p{line-height:1.95}
 @media(max-width:720px){.prohibition-item{align-items:flex-start;flex-direction:column}.prohibition-dialog{max-height:88vh}}
+
+/* Muslim Hub tools */
+.hub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hub-grid .feature-card{min-width:0}
+.juz-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
+.juz-grid label,.plan-row{display:flex;align-items:center;gap:7px;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);font-size:13px}
+.plan-row{margin:6px 0}
+.lesson-detail{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.lesson-detail summary{cursor:pointer;color:var(--gold);font-weight:bold}
+.lesson-detail p{line-height:1.9}
+.share-card-preview{margin-top:12px}
+.share-card-preview canvas{display:block;width:100%;max-width:330px;height:auto;border-radius:12px;border:1px solid var(--accent2)}
+body.mosque-mode .hero:after,body.mosque-mode .ambient-glow,body.mosque-mode .drawer-handle{display:none!important}
+body.mosque-mode .card,body.mosque-mode .feature-card{box-shadow:none!important}
+body.mosque-mode{background:var(--bg)}
+body.serenity-mode .sidebar,body.serenity-mode .top,body.serenity-mode .bottom,body.serenity-mode .drawer-handle,body.serenity-mode .hero{display:none!important}
+body.serenity-mode .app{padding-top:8vh}
+body.serenity-mode #hub .hub-grid{display:none}
+body.serenity-mode #hub .section-head{display:none}
+body.serenity-mode #serenityVerse{font-size:clamp(28px,5vw,52px);padding:15vh 5vw;line-height:2.1;color:var(--gold)}
+@media(max-width:720px){.hub-grid{grid-template-columns:1fr}.juz-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
