@@ -1,0 +1,13 @@
+{
+  "name": "i-Muslim | رفيق المسلم",
+  "short_name": "i-Muslim",
+  "description": "القرآن والصلاة والأذكار والقبلة",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071b18",
+  "theme_color": "#071b18",
+  "icons": []
+}
