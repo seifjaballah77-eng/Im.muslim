@@ -429,4 +429,217 @@ readLocal('rainSound',false).then(v=>{if(v){if($('#ambientToggle'))$('#ambientTo
 /* Make the prayer edge effect and time theme respect reduced motion. */
 refreshPrayer();refreshContinueCard();
 
+/* Universal tap-to-understand bottom sheet for Quran, hadith, adhkar and Names. */
+if(!$('#knowledgeShade'))document.body.insertAdjacentHTML('beforeend',
+'<div id="knowledgeShade" class="knowledge-shade" hidden></div><section id="knowledgeSheet" class="knowledge-sheet" role="dialog" aria-modal="true" aria-labelledby="knowledgeTitle" hidden><div class="sheet-grab"></div><header class="sheet-head"><div><span class="feature-pill">اضغط وافهم</span><h2 id="knowledgeTitle">شرح المحتوى</h2></div><button id="knowledgeClose" class="smallbtn" aria-label="إغلاق">✕</button></header><div id="knowledgeSource" class="feature-note"></div><nav id="knowledgeTabs" class="sheet-tabs"><button data-sheet-tab="meaning" class="active">المعنى والتفسير</button><button data-sheet-tab="words">معاني الكلمات</button><button data-sheet-tab="reason">سبب النزول / المصدر</button></nav><div id="knowledgeBody" class="sheet-body"></div><footer id="knowledgeActions" class="sheet-actions"></footer></section>');
+let sheetContext=null;
+const wordMeanings={
+ 'السكينة':'الطمأنينة والثبات الذي يلقيه الله في القلب.','الصمد':'السيد الكامل المقصود في الحوائج، الذي يُفتقر إليه ولا يفتقر إلى أحد.','القارعة':'اسم من أسماء يوم القيامة، تقرع القلوب بأهوالها.','الغاشية':'القيامة التي تغشى الناس بأهوالها.','الكوثر':'الخير الكثير، ومنه النهر الذي أعطاه الله لنبيه ﷺ.','أبّاً':'الكلأ والمرعى، على أحد أشهر أقوال المفسرين.','قسورة':'الأسد أو الرماة، وقد ذكر المفسرون أكثر من قول.','سِجّين':'كتاب جامع لأعمال الفجار أو موضع سجلهم، كما فسره أهل التفسير.','عِلِّيِّين':'كتاب الأبرار أو موضع رفيع، على ما جاء في التفسير.','الصمد':'الذي تصمد إليه الخلائق في حاجاتها.','فاطر':'خالق ومبدع على غير مثال سابق.','يؤفكون':'يُصرفون عن الحق أو يُكذبون، بحسب السياق.','الفتنة':'تأتي بمعانٍ متعددة بحسب السياق، منها الابتلاء والاختبار.','الروح':'لفظ تتعدد دلالاته في القرآن، ويحدد السياق المقصود.','الهدى':'الدلالة إلى الحق والطريق المستقيم.','الرحمة':'الإحسان والرأفة واللطف، وتفصيل معناها بحسب السياق.','الغفور':'كثير المغفرة لعباده التائبين.','الرزاق':'الذي يرزق الخلق ويتولى أقواتهم.','اللطيف':'الرفيق بعباده، العالم بدقائق الأمور، ويأتي بمعانٍ يوضحها السياق.'
+};
+function sheetOpen(data){
+ sheetContext=data;$('#knowledgeTitle').textContent=data.title||'شرح المحتوى';$('#knowledgeSource').textContent=data.source||'';
+ $('#knowledgeSheet').hidden=false;$('#knowledgeShade').hidden=false;document.body.classList.add('sheet-open');
+ all('#knowledgeTabs button').forEach(b=>b.classList.toggle('active',b.dataset.sheetTab==='meaning'));
+ renderSheetTab('meaning');if(navigator.vibrate)navigator.vibrate(16);
+}
+function sheetClose(){$('#knowledgeSheet').hidden=true;$('#knowledgeShade').hidden=true;document.body.classList.remove('sheet-open');sheetContext=null}
+$('#knowledgeClose')?.addEventListener('click',sheetClose);$('#knowledgeShade')?.addEventListener('click',sheetClose);
+$('#knowledgeTabs')?.addEventListener('click',e=>{const b=e.target.closest('[data-sheet-tab]');if(!b)return;all('#knowledgeTabs button').forEach(x=>x.classList.toggle('active',x===b));renderSheetTab(b.dataset.sheetTab)});
+function renderSheetTab(tab){
+ const box=$('#knowledgeBody'),d=sheetContext;if(!d)return;
+ if(tab==='meaning'){
+  box.innerHTML='<div class="sheet-section"><h3>المعنى والتفسير</h3><p id="sheetMeaning" class="sheet-prose"></p></div>';
+  $('#sheetMeaning').textContent=d.meaning||'لا يتوفر شرح موثق لهذا المحتوى بعد.';
+  if(d.kind==='verse'&&d.surah&&d.ayah){
+   const p=document.createElement('p');p.className='feature-note';p.textContent='جارٍ تحميل التفسير الميسر…';box.appendChild(p);
+   fetch(api+'/ayah/'+d.surah+':'+d.ayah+'/ar.muyassar').then(r=>{if(!r.ok)throw Error();return r.json()}).then(j=>{p.textContent='التفسير الميسر: '+j.data.text}).catch(()=>{p.textContent='تعذر تحميل التفسير من الخدمة حالياً.'});
+  }
+ }else if(tab==='words'){
+  box.innerHTML='<h3>معاني الكلمات</h3><p class="feature-note">اضغط على كلمة لعرض معناها المختصر. قد تتغير الدلالة بحسب سياق الآية.</p><div id="sheetWordChips" class="topic-chips"></div><div id="sheetWordMeaning" class="tafsir-box">اختر كلمة من النص.</div>';
+  const words=(d.text||'').replace(/[﴿﴾۞]/g,'').split(/\s+/).filter(Boolean);
+  const chosen=[...new Set(words)].slice(0,45);
+  $('#sheetWordChips').innerHTML=chosen.map((w,i)=>'<button data-word-index="'+i+'"></button>').join('');
+  chosen.forEach((w,i)=>$('#sheetWordChips').children[i].textContent=w);
+  $('#sheetWordChips').onclick=e=>{const b=e.target.closest('[data-word-index]');if(!b)return;const w=chosen[Number(b.dataset.wordIndex)];$('#sheetWordMeaning').textContent=wordMeanings[w.replace(/[،؛.!؟]/g,'')]||'لا تتوفر مفردة موثقة لهذه الكلمة في المعجم المختصر الحالي. راجع تفسيراً معتمداً لفهمها في سياق الآية.'};
+ }else{
+  box.innerHTML='<h3>سبب النزول والمصدر</h3><p class="sheet-prose"></p><p class="feature-note"></p>';
+  if(d.kind==='verse'){
+   box.querySelector('.sheet-prose').textContent='لا يثبت سبب نزول خاص لكل آية. لا تتوفر في مصدر التفسير الحالي بيانات أسباب النزول لهذه الآية، ولذلك لن ننسب إليها سبباً غير موثق.';
+   box.querySelector('.feature-note').textContent='للتوسع في أسباب النزول، يُرجع إلى كتب معتمدة مثل «لباب النقول في أسباب النزول» للسيوطي، مع مراجعة صحة الرواية.';
+  }else{
+   box.querySelector('.sheet-prose').textContent=d.source||'لم يُسجل مصدر تفصيلي لهذا العنصر.';
+   box.querySelector('.feature-note').textContent=d.note||'المعنى المختصر للتقريب وليس بديلاً عن الرجوع إلى المرجع الأصلي.';
+  }
+ }
+}
+$('#knowledgeActions')?.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-sheet-action]');if(!b||!sheetContext)return;
+ const d=sheetContext,action=b.dataset.sheetAction;
+ if(action==='copy'||action==='share'){
+  const text=(d.text||'')+(d.source?'\n'+d.source:'')+'\n— i-Muslim';
+  try{if(action==='share'&&navigator.share)await navigator.share({title:d.title||'i-Muslim',text});else{await navigator.clipboard.writeText(text);toast('تم النسخ للمشاركة')}}catch(e){}
+ }
+ if(action==='read'&&d.kind==='verse'){
+  const key=d.surah+':'+d.ayah;if(!dailyReadVerses.includes(key))dailyReadVerses.push(key);
+  dailyReadCount=dailyReadVerses.length;await saveLocal('dailyReadDate',todayKey);await saveLocal('dailyReadVerses',dailyReadVerses);updateDailyProgress();await addStat('verses',dailyReadCount);toast('تم تسجيل الآية ضمن ورد اليوم');
+ }
+ if(action==='favorite'&&d.kind==='verse'){
+  const fav=await readLocal('favoriteVerses',[]);if(!fav.some(x=>x.surah===d.surah&&Number(x.ayah)===Number(d.ayah))){fav.push({text:d.text,surah:d.surah,ayah:d.ayah});await saveLocal('favoriteVerses',fav)}toast('حُفظت الآية في المفضلة');renderFavorites();
+ }
+});
+/* A tap on verse text opens the sheet instead of navigating or silently marking it read. */
+document.addEventListener('click',e=>{
+ const el=e.target.closest('.verse');if(!el||e.target.closest('button'))return;
+ e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+ const text=(el.childNodes[0]?.textContent||'').trim(),surah=activeSurah,ayah=Number(el.dataset.ayah);
+ sheetOpen({kind:'verse',title:'سورة '+(window.surahs?.[surah-1]?.name||surah)+' · الآية '+ayah,source:'القرآن الكريم · '+surah+':'+ayah,text,surah,ayah});
+ $('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="read">سجّلها مقروءة</button><button class="feature-btn" data-sheet-action="favorite">حفظ</button><button class="feature-btn" data-sheet-action="copy">نسخ</button><button class="feature-btn primary" data-sheet-action="share">مشاركة</button>';
+},true);
+/* Content explanation is also available for hadith, adhkar and divine names. */
+const hadithMeanings=[
+'تُظهر النية قيمة العمل ومقصده؛ ويُرجع في تفاصيل الحديث إلى شروحه المعتمدة.',
+'النصيحة تشمل إخلاص القصد وإرادة الخير، وتفاصيل الحديث مبسوطة في شروح صحيح مسلم.',
+'يدعو الحديث إلى محبة الخير للآخرين كما يحبه المرء لنفسه.',
+'يرشد الحديث إلى حفظ اللسان، وقول الخير أو الصمت.',
+'الكلمة الطيبة من أبواب الإحسان والصدقة.',
+'في الحديث توجيه إلى الرفق والتيسير في الدعوة والمعاملة.'
+];
+$('#hadithList')?.addEventListener('click',e=>{
+ const el=e.target.closest('.feature-item');if(!el||e.target.closest('button'))return;
+ const i=[...$('#hadithList').children].indexOf(el),h=hadiths[i];if(!h)return;
+ sheetOpen({kind:'hadith',title:'شرح الحديث',source:h[1]+' · '+h[2],text:h[0],meaning:hadithMeanings[i]||'اقرأ الحديث مع مصدره وارجع إلى شروحه المعتمدة.',note:'المصدر والترقيم كما هو معروض في البطاقة، وقد تختلف أرقام الأحاديث بين الطبعات.'});
+ $('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="copy">نسخ الحديث</button><button class="feature-btn primary" data-sheet-action="share">مشاركة</button>';
+});
+$('#adhkarList')?.addEventListener('click',e=>{
+ const el=e.target.closest('.feature-item');if(!el||e.target.closest('button'))return;
+ const text=el.querySelector('.arabic')?.textContent||'',count=el.querySelector('small')?.textContent||'';
+ sheetOpen({kind:'dhikr',title:'فهم الذكر',source:count,text,meaning:'هذا الذكر يشتمل على ذكر الله ودعائه في هذا الوقت. تختلف الفضائل الخاصة باختلاف النصوص والروايات، ولا ننسب أجراً محدداً هنا من دون توثيق مستقل.',note:'يمكن الرجوع إلى تخريج الذكر ومصدره قبل اعتماد فضيلة مخصوصة.'});
+ $('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="copy">نسخ الذكر</button><button class="feature-btn primary" data-sheet-action="share">مشاركة</button>';
+});
+/* A curated set of Quranic divine names with concise language-based meanings. */
+const divineNames=[
+['الله','المعبود بحق، الجامع لصفات الكمال.','إفراد الله بالعبادة والتوكل.'],['الرحمن','واسع الرحمة لجميع الخلق.','الرجاء في رحمة الله والرفق بالناس.'],['الرحيم','المتفضل بالرحمة بعباده.','طلب الرحمة والإحسان إلى الخلق.'],['الملك','المالك المتصرف في خلقه.','التواضع وعدم التعلق بالملك الزائل.'],['القدوس','المنزه عن كل نقص.','تنزيه الله وتعظيمه.'],['السلام','السالم من كل عيب ونقص.','سؤال الله السلامة ونشر السلام.'],['المؤمن','الذي يؤمّن عباده ويصدق رسله.','الثقة بوعد الله.'],['المهيمن','الرقيب الحافظ الشهيد على خلقه.','استشعار مراقبة الله.'],['العزيز','الغالب الذي لا يُغلب.','طلب العزة بطاعة الله.'],['الجبار','العالي القاهر، وجابر كسر عباده.','الافتقار إلى جبر الله ورحمته.'],['المتكبر','المتفرد بالعظمة والكبرياء.','ترك الكبر على الناس.'],['الخالق','الذي أوجد الخلق وقدرهم.','التفكر في خلق الله.'],['البارئ','الذي خلق الخلق بريئاً من التفاوت.','التأمل في بديع صنعه.'],['المصور','الذي أعطى كل مخلوق صورته.','شكر الله على نعمه.'],['الغفار','كثير المغفرة.','الإكثار من التوبة والاستغفار.'],['القهار','الذي قهر كل شيء بقدرته.','عدم الاغترار بالقوة.'],['الوهاب','كثير العطاء بلا عوض.','سؤال الله من فضله.'],['الرزاق','الذي يرزق الخلق.','الأخذ بالأسباب مع التوكل.'],['الفتاح','الذي يفتح أبواب الرحمة والحكم والرزق.','سؤال الله الفرج والهداية.'],['العليم','المحيط بكل شيء علماً.','مراقبة الله في السر والعلن.'],['السميع','الذي يسمع كل الأصوات.','الإكثار من الدعاء.'],['البصير','الذي يرى كل شيء.','الإحسان في العمل.'],['اللطيف','الرفيق بعباده، العالم بدقائق الأمور.','حسن الظن بلطف الله.'],['الخبير','العالم ببواطن الأمور.','إصلاح السريرة.'],['الحليم','الذي لا يعاجل بالعقوبة.','الحلم والأناة.'],['العظيم','الذي له العظمة والكمال.','تعظيم الله في القلب.'],['الغفور','واسع المغفرة.','عدم اليأس من التوبة.'],['الشكور','الذي يثيب على العمل القليل الثواب الكثير.','شكر النعم والمداومة على الخير.'],['العلي','المتعالي فوق خلقه.','رفع الهمة بالطاعة.'],['الكبير','العظيم الذي كل شيء دونه.','التواضع لله.'],['الحفيظ','الحافظ لكل شيء.','الاستيداع والدعاء بالحفظ.'],['الكريم','كثير الخير والعطاء.','الكرم مع الخلق.'],['الرقيب','المطلع الذي لا يغيب عنه شيء.','مراقبة الأقوال والأعمال.'],['المجيب','الذي يجيب دعاء من دعاه بحكمته.','الإلحاح في الدعاء مع حسن الظن.'],['الواسع','الذي وسعت رحمته وعلمه كل شيء.','عدم القنوط من فضل الله.'],['الحكيم','الذي يضع الأمور مواضعها.','التسليم لحكمة الله.'],['الودود','المحب لعباده المؤمنين والمحبوب لهم.','محبة الله واتباع ما يرضيه.'],['المجيد','العظيم الواسع الكرم والشرف.','تعظيم الله والثناء عليه.'],['الوكيل','الكفيل بأمور عباده.','التوكل مع فعل الأسباب.'],['القوي','كامل القوة.','طلب العون من الله.'],['المتين','شديد القوة الذي لا يلحقه ضعف.','الثبات والاستعانة بالله.'],['الولي','الناصر والمتولي لأمور عباده.','موالاة أهل الإيمان والاعتماد على الله.'],['الحميد','المستحق للحمد كله.','حمد الله في السراء والضراء.'],['الحي','كامل الحياة التي لا يلحقها زوال.','دعاء الحي القيوم.'],['القيوم','القائم بنفسه المقيم لغيره.','التوكل على الله القائم على كل نفس.'],['الواحد','المتفرد الذي لا شريك له.','إخلاص العبادة له.'],['الصمد','السيد الذي تصمد إليه الخلائق في حوائجها.','سؤال الله وحده.'],['القادر','الذي لا يعجزه شيء.','الثقة بقدرة الله.'],['الأول والآخر','الأول الذي ليس قبله شيء والآخر الذي ليس بعده شيء.','تعلق القلب بالله الباقي.'],['النور','الذي بنوره يهتدي أهل السماوات والأرض.','طلب نور الهداية.']
+];
+const namesBox=$('#namesList');
+if(namesBox){
+ namesBox.innerHTML='<p class="feature-note">أسماء مختارة وردت في القرآن والسنة، مع معانٍ تقريبية وأثر إيماني للتدبر. في تعيين القائمة المشهورة للأسماء الحسنى وجمعها خلاف بين أهل العلم؛ فلا تُعرض هذه المجموعة باعتبارها حصراً نهائياً.</p><input id="divineSearch" class="feature-input" placeholder="ابحث عن اسم أو معنى..."><div id="divineNamesGrid" class="feature-grid"></div>';
+ function renderDivineNames(){const q=$('#divineSearch').value.trim();const rows=divineNames.filter(n=>n.join(' ').includes(q));$('#divineNamesGrid').innerHTML=rows.map((n,i)=>'<button class="feature-card divine-name" data-divine="'+i+'"><span class="feature-kpi"></span><small>اضغط لفهم الاسم</small></button>').join('');rows.forEach((n,i)=>$('#divineNamesGrid').children[i].querySelector('.feature-kpi').textContent=n[0]);}
+ $('#divineSearch').addEventListener('input',renderDivineNames);renderDivineNames();
+ $('#divineNamesGrid').addEventListener('click',e=>{const b=e.target.closest('[data-divine]');if(!b)return;const n=divineNames.find(x=>x[0]===b.querySelector('.feature-kpi').textContent);if(!n)return;sheetOpen({kind:'name',title:n[0],source:'معنى تقريبي للتدبر',text:n[0],meaning:n[1],note:'أثر إيماني مقترح: '+n[2]});$('#knowledgeTabs [data-sheet-tab="words"]').hidden=true;$('#knowledgeTabs [data-sheet-tab="reason"]').textContent='الأثر الإيماني';$('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="copy">نسخ</button>'});
+}
+/* Seasonal engine: Friday, Ramadan and the two Eid days use local Hijri date. */
+const festiveHost=$('#home .hero');
+if(festiveHost)festiveHost.insertAdjacentHTML('afterend','<section id="festiveBanner" class="feature-card festive-banner" hidden><div class="feature-row"><div><span class="feature-pill" id="festiveTag">مناسبة</span><h3 id="festiveTitle"></h3><p id="festiveMessage" class="muted"></p></div><button id="festiveShare" class="feature-btn">مشاركة</button></div><div class="feature-actions" id="festiveActions"></div></section>');
+let festiveInfo=null;
+async function seasonalDecor(){
+ const friday=new Date().getDay()===5;let hijri=null;
+ try{const r=await fetch('https://api.aladhan.com/v1/gToH');if(r.ok)hijri=(await r.json()).data.hijri}catch(e){}
+ const month=Number(hijri?.month?.number||0),day=Number(hijri?.day||0);
+ let info=null;
+ if(month===9){info={tag:'رمضان كريم',title:'رمضان المبارك',message:'اجعل يومك عامراً بالقرآن والذكر والصدقة وصلة الرحم.',actions:[['ورد القرآن','quran'],['أذكار اليوم','adhkar']]};}
+ else if(month===10&&day===1){info={tag:'عيد مبارك',title:'عيد الفطر المبارك',message:'تقبل الله منا ومنكم صالح الأعمال.',actions:[['بطاقة تهنئة','greeting'],['التكبيرات','takbeer']]};}
+ else if(month===12&&day===10){info={tag:'عيد مبارك',title:'عيد الأضحى المبارك',message:'كل عام وأنتم بخير، تقبل الله الطاعات.',actions:[['بطاقة تهنئة','greeting'],['التكبيرات','takbeer']]};}
+ else if(month===12&&day===9){info={tag:'يوم عرفة',title:'يوم عرفة',message:'أكثر من الدعاء والذكر، وتحقق من إعلان بلدك بشأن اليوم.',actions:[['الأذكار','adhkar']]};}
+ else if(month===9&&day>=21){info={tag:'العشر الأواخر',title:'العشر الأواخر من رمضان',message:'اجتهد في القيام والقرآن والدعاء، ولا تجزم بليلة القدر في ليلة بعينها.',actions:[['آية اليوم','quran']]};}
+ else if(friday){info={tag:'جمعة مباركة',title:'فضائل يوم الجمعة',message:'تذكّر قراءة سورة الكهف، والإكثار من الصلاة على النبي ﷺ، وتحري ساعة الإجابة.',actions:[['سورة الكهف','kahf'],['الصلاة على النبي ﷺ','salawat']]};}
+ if(!info)return;
+ festiveInfo=info;const banner=$('#festiveBanner');banner.hidden=false;$('#festiveTag').textContent=info.tag;$('#festiveTitle').textContent=info.title;$('#festiveMessage').textContent=info.message;
+ document.body.dataset.festival=month===9?'ramadan':(info.title.includes('عيد')?'eid':friday?'friday':'special');
+ $('#festiveActions').innerHTML=info.actions.map((a,i)=>'<button class="feature-btn" data-festive-action="'+i+'">'+a[0]+'</button>').join('');
+ $('#festiveActions').onclick=e=>{const b=e.target.closest('[data-festive-action]');if(!b)return;const act=info.actions[Number(b.dataset.festiveAction)][1];if(act==='kahf'){window.openSection('quran');window.loadSurah(18)}else if(act==='salawat'){window.openSection('tasbih');$('#tasbihPreset').value='اللهم صل وسلم على نبينا محمد';$('#tasbihPreset').dispatchEvent(new Event('change'))}else if(act==='greeting'){window.openSection('seasons');$('#greetingName')?.focus()}else if(act==='takbeer'){window.openSection('seasons');$('#takbeerPlayer')?.play().catch(()=>{})}else window.openSection(act)};
+ $('#festiveShare').onclick=async()=>{const text=info.title+'\n'+info.message+'\n— i-Muslim';try{if(navigator.share)await navigator.share({title:info.title,text});else{await navigator.clipboard.writeText(text);toast('تم نسخ التهنئة')}}catch(e){}};
+ if(friday){applyAccent('emerald');const btn=$('#home [data-open="quran"]');if(btn)btn.classList.add('active-card')}
+}
+seasonalDecor();
+/* Eid greeting cards generated locally as a shareable image. */
+const seasonGrid=$('#seasons .feature-grid');
+if(seasonGrid)seasonGrid.insertAdjacentHTML('beforeend','<article class="feature-card"><h3>بطاقة تهنئة قابلة للمشاركة</h3><input id="greetingName" class="feature-input" maxlength="28" placeholder="اكتب اسمك أو اسم العائلة"><select id="greetingKind" class="feature-select"><option value="عيد مبارك">عيد مبارك</option><option value="رمضان كريم">رمضان كريم</option><option value="جمعة مباركة">جمعة مباركة</option></select><button id="makeGreetingCard" class="feature-btn primary">إنشاء البطاقة</button><canvas id="greetingCanvas" width="1200" height="675" style="width:100%;display:none;border-radius:14px;margin-top:12px"></canvas><button id="shareGreetingCard" class="feature-btn" disabled>مشاركة الصورة</button></article><article class="feature-card"><h3>تكبيرات العيد</h3><p class="arabic">الله أكبر الله أكبر، لا إله إلا الله، الله أكبر الله أكبر، ولله الحمد.</p><input id="takbeerFile" class="feature-input" type="file" accept="audio/*"><audio id="takbeerPlayer" controls class="reader-audio"></audio><p class="feature-note">أضف تسجيلاً تملك حق استخدامه ليعمل مشغل التكبيرات؛ لا نحمّل ملفاً صوتياً مجهول المصدر.</p></article>');
+let greetingBlob=null,takbeerUrl=null;
+$('#makeGreetingCard')?.addEventListener('click',()=>{
+ const c=$('#greetingCanvas'),x=c.getContext('2d'),name=$('#greetingName').value.trim(),kind=$('#greetingKind').value;
+ x.fillStyle='#0d2921';x.fillRect(0,0,c.width,c.height);
+ const grad=x.createLinearGradient(0,0,c.width,c.height);grad.addColorStop(0,'#214b38');grad.addColorStop(1,'#101d19');x.fillStyle=grad;x.fillRect(18,18,c.width-36,c.height-36);
+ x.strokeStyle='#d8b56d';x.lineWidth=4;x.strokeRect(42,42,c.width-84,c.height-84);
+ x.textAlign='center';x.fillStyle='#dfc17d';x.font='bold 92px Tahoma';x.fillText('۞',600,175);
+ x.fillStyle='#fff4d8';x.font='bold 76px Tahoma';x.fillText(kind,600,320);
+ x.fillStyle='#d8c9a6';x.font='40px Tahoma';x.fillText(name?('من '+name):'تقبل الله طاعتكم',600,410);
+ x.fillStyle='#e1c47e';x.font='30px Tahoma';x.fillText('i-Muslim',600,520);
+ c.style.display='block';c.toBlob(b=>{greetingBlob=b;$('#shareGreetingCard').disabled=!b});
+});
+$('#shareGreetingCard')?.addEventListener('click',async()=>{if(!greetingBlob)return;const file=new File([greetingBlob],'i-muslim-greeting.png',{type:'image/png'});try{if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'تهنئة i-Muslim'});else{const url=URL.createObjectURL(greetingBlob),a=document.createElement('a');a.href=url;a.download='i-muslim-greeting.png';a.click();URL.revokeObjectURL(url)}}catch(e){}});
+$('#takbeerFile')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(takbeerUrl)URL.revokeObjectURL(takbeerUrl);takbeerUrl=URL.createObjectURL(f);$('#takbeerPlayer').src=takbeerUrl;});
+/* Haptics, optional soft click sound and tactile ripple. */
+settingsExtras?.insertAdjacentHTML('beforeend','<div class="listitem"><label><input id="hapticsToggle" type="checkbox" checked> اهتزازات خفيفة عند اللمس</label></div><div class="listitem"><label><input id="clickSoundToggle" type="checkbox"> صوت نقرة خفيف</label></div>');
+let hapticsOn=true,clickSoundOn=false;
+readLocal('hapticsOn',true).then(v=>{hapticsOn=!!v;if($('#hapticsToggle'))$('#hapticsToggle').checked=hapticsOn});
+readLocal('clickSoundOn',false).then(v=>{clickSoundOn=!!v;if($('#clickSoundToggle'))$('#clickSoundToggle').checked=clickSoundOn});
+$('#hapticsToggle')?.addEventListener('change',e=>{hapticsOn=e.target.checked;saveLocal('hapticsOn',hapticsOn)});
+$('#clickSoundToggle')?.addEventListener('change',e=>{clickSoundOn=e.target.checked;saveLocal('clickSoundOn',clickSoundOn)});
+let clickCtx=null,lastRipple=0;
+document.addEventListener('pointerdown',e=>{
+ const target=e.target.closest('button,.tile,.feature-card,.feature-item');if(!target||target.closest('.knowledge-sheet'))return;
+ const now=Date.now();if(now-lastRipple>30){lastRipple=now;target.classList.add('ripple-touch');setTimeout(()=>target.classList.remove('ripple-touch'),480)}
+ if(hapticsOn&&navigator.vibrate&&target.matches('button,.tile'))navigator.vibrate(10);
+ if(clickSoundOn){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!clickCtx)clickCtx=new C();const o=clickCtx.createOscillator(),g=clickCtx.createGain();o.type='sine';o.frequency.value=740;g.gain.setValueAtTime(.0001,clickCtx.currentTime);g.gain.exponentialRampToValueAtTime(.018,clickCtx.currentTime+.008);g.gain.exponentialRampToValueAtTime(.0001,clickCtx.currentTime+.055);o.connect(g);g.connect(clickCtx.destination);o.start();o.stop(clickCtx.currentTime+.06)}catch(e){}}
+},{passive:true});
+/* 3D beads visualize the tasbih count and move with each count. */
+if(tasCard)tasCard.insertAdjacentHTML('beforeend','<div class="bead-rope" id="beadRope" aria-label="مسبحة من 33 حبة">'+Array.from({length:33},(_,i)=>'<span class="bead" data-bead="'+i+'"></span>').join('')+'</div><div class="feature-note center" id="beadProgress">حبات المسبحة: 0 / 33</div>');
+function updateBeads(){const c=Number($('#count')?.textContent)||0;all('.bead').forEach((b,i)=>b.classList.toggle('lit',i<c%33));const p=$('#beadProgress');if(p)p.textContent='حبات المسبحة: '+(c%33|| (c?33:0))+' / 33 · الإجمالي '+c;const rope=$('#beadRope');if(rope)rope.style.transform='rotateY('+(c%360)+'deg) rotateX('+(Math.sin(c/5)*3)+'deg)'}
+const watchCount=new MutationObserver(updateBeads);if($('#count'))watchCount.observe($('#count'),{childList:true,characterData:true,subtree:true});updateBeads();
+/* Hifz vocal practice: browser speech recognition is approximate, not Tajweed grading. */
+if(quizTarget)quizTarget.insertAdjacentHTML('beforeend','<div class="feature-card"><h3>التسميع بالصوت – تجريبي</h3><p class="feature-note">اقرأ الآية بصوتك. مطابقة الكلمات تعتمد على التعرف الصوتي في المتصفح وقد تخطئ؛ لا تقيس التجويد أو مخارج الحروف ولا تعتمد عليها لتصحيح التلاوة.</p><div class="feature-actions"><button id="startRecitation" class="feature-btn primary">ابدأ التسميع</button><button id="stopRecitation" class="feature-btn">إيقاف</button></div><div id="recitationTranscript" class="feature-item">افتح سورة وحدد آية، ثم ابدأ التسميع.</div><div class="voice-meter"><div id="voiceMeterFill"></div></div><p id="recitationStatus" class="feature-note"></p></div>');
+let recognition=null,micStream=null,micContext=null,micAnalyser=null,micFrame=null,recitationWords=[];
+function normalizeArabic(t){return t.normalize('NFD').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/[^\u0621-\u064A\s]/g,'').trim().split(/\s+/).filter(Boolean)}
+$('#startRecitation')?.addEventListener('click',()=>{
+ const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech)return toast('التعرف على الصوت غير مدعوم في متصفحك');
+ const verse=[...all('#surahContent .verse')].find(x=>{const r=x.getBoundingClientRect();return r.top<innerHeight*.7&&r.bottom>100});
+ if(!verse)return toast('افتح سورة وأبقِ الآية المراد تسميعها ظاهرة');
+ const text=(verse.childNodes[0]?.textContent||'').trim();recitationWords=normalizeArabic(text);
+ const rec=new Speech();recognition=rec;rec.lang='ar-SA';rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+ rec.onresult=e=>{
+  let spoken='';for(let i=0;i<e.results.length;i++)spoken+=e.results[i][0].transcript+' ';
+  const tokens=normalizeArabic(spoken),container=$('#recitationTranscript');container.innerHTML='';
+  const matched=new Set(tokens);recitationWords.forEach(w=>{const span=document.createElement('span');span.textContent=w+' ';span.className=matched.has(w)?'voice-correct':'voice-pending';container.appendChild(span)});
+  const hits=recitationWords.filter(w=>matched.has(w)).length;$('#recitationStatus').textContent='مطابقة تقريبية للكلمات: '+hits+' / '+recitationWords.length+'. راجع النص بنفسك، فالتعرف الصوتي قد يخطئ.';
+ };
+ rec.onerror=()=>$('#recitationStatus').textContent='تعذر التعرف على الصوت؛ تحقق من إذن الميكروفون والاتصال.';
+ rec.onend=()=>$('#recitationStatus').textContent+=' · انتهت جلسة التعرف.';
+ rec.start();$('#recitationStatus').textContent='جارٍ الاستماع…';
+});
+$('#stopRecitation')?.addEventListener('click',()=>{recognition?.stop();recognition=null;if(micStream)micStream.getTracks().forEach(t=>t.stop());if(micFrame)cancelAnimationFrame(micFrame);if(micContext)micContext.close().catch(()=>{});$('#voiceMeterFill').style.width='0%'});
+/* Microphone level meter is only a level indicator, not a recitation quality or Tajweed score. */
+async function startMicMeter(){
+ try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});const C=window.AudioContext||window.webkitAudioContext;micContext=new C();const src=micContext.createMediaStreamSource(micStream);micAnalyser=micContext.createAnalyser();micAnalyser.fftSize=256;src.connect(micAnalyser);const data=new Uint8Array(micAnalyser.frequencyBinCount);const draw=()=>{micAnalyser.getByteTimeDomainData(data);let sum=0;for(const v of data)sum+=(v-128)**2;const level=Math.min(100,Math.sqrt(sum/data.length)/45*100);$('#voiceMeterFill').style.width=level+'%';micFrame=requestAnimationFrame(draw)};draw()}catch(e){$('#recitationStatus').textContent='لم يسمح المتصفح باستخدام الميكروفون.'}
+}
+/* enable the live sound level meter after a separate explicit press */
+if(quizTarget)quizTarget.insertAdjacentHTML('beforeend','<button id="enableVoiceMeter" class="feature-btn">تفعيل مؤشر مستوى الصوت</button>');
+$('#enableVoiceMeter')?.addEventListener('click',startMicMeter);
+/* AR-style camera radar uses a compass arrow only; it is not a calibrated AR Kaaba overlay. */
+const qiblaPage=$('#qibla .card');
+if(qiblaPage)qiblaPage.insertAdjacentHTML('beforeend','<div class="feature-card"><h3>رادار اتجاه القبلة بالكاميرا – تجريبي</h3><video id="qiblaCamera" playsinline muted style="width:100%;border-radius:14px;display:none"></video><div class="feature-actions"><button id="startQiblaCamera" class="feature-btn">فتح الكاميرا</button><button id="stopQiblaCamera" class="feature-btn">إيقاف الكاميرا</button></div><p class="feature-note">يعرض سهم اتجاه تقريبي اعتماداً على مستشعر الهاتف، وليس إسقاطاً ثلاثي الأبعاد للكعبة ولا بديلاً عن معايرة البوصلة.</p></div>');
+let qiblaCameraStream=null;
+$('#startQiblaCamera')?.addEventListener('click',async()=>{try{qiblaCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});$('#qiblaCamera').srcObject=qiblaCameraStream;$('#qiblaCamera').style.display='block';await $('#qiblaCamera').play()}catch(e){toast('تعذر فتح الكاميرا؛ تحقق من الإذن') }});
+$('#stopQiblaCamera')?.addEventListener('click',()=>{qiblaCameraStream?.getTracks().forEach(t=>t.stop());qiblaCameraStream=null;$('#qiblaCamera').pause();$('#qiblaCamera').srcObject=null;$('#qiblaCamera').style.display='none'});
+/* Tree and badges are calculated from local, recorded activity. */
+const statsCard=$('#stats .feature-card:last-child');
+if(statsCard)statsCard.insertAdjacentHTML('afterbegin','<div class="tree-achievement"><div class="tree-crown" id="treeCrown">✦</div><div class="tree-trunk"></div><div class="feature-note" id="treeMessage">ازرع وردك اليومي بالمداومة.</div></div><h3>أوسمة الإنجاز</h3><div id="achievementBadges" class="badge-grid"></div>');
+async function renderAchievements(){
+ const log=await readLocal('activityLog',{}),days=Object.keys(log).filter(k=>{const v=log[k]||{};return (v.verses||0)+(v.tasbih||0)+(v.adhkar||0)>0}).sort();
+ const totalTasbih=Object.values(log).reduce((a,v)=>a+(v.tasbih||0),0);
+ const badges=[['قارئ مواظب','سجّل قراءة في 7 أيام مختلفة',days.length>=7],['ألف تسبيحة','أتم 1000 تسبيحة',totalTasbih>=1000],['سلسلة أسبوع','نشاط في 7 أيام متتالية',Number($('#statsStreak')?.textContent)>=7],['قارئ الكهف','فتح سورة الكهف',Number((await readLocal('surah18Opened',0))||0)>0]];
+ const unlocked=badges.filter(b=>b[2]).length;
+ $('#treeCrown').textContent=['✦','✧','❀','✿','۞'][Math.min(4,Math.floor(unlocked*4/Math.max(1,badges.length)))];
+ $('#treeMessage').textContent=unlocked===0?'ابدأ بخطوة صغيرة اليوم؛ تنمو الشجرة مع المداومة.':'أحسنت، أحرزت '+unlocked+' من '+badges.length+' أوسمة.';
+ $('#achievementBadges').innerHTML=badges.map(b=>'<div class="badge-item '+(b[2]?'earned':'locked')+'"><b>'+b[0]+'</b><small>'+b[1]+'</small><span>'+(b[2]?'مُكتسب':'قيد الإنجاز')+'</span></div>').join('');
+}
+const priorRenderStats=renderStats;
+renderStats=async function(){await priorRenderStats();await renderAchievements()};
+if(typeof window.loadSurah==='function'){
+ const previousSurahLoader=window.loadSurah;
+ window.loadSurah=async function(n){const r=await previousSurahLoader(n);if(n===18){const v=Number(await readLocal('surah18Opened',0))+1;saveLocal('surah18Opened',v)}return r};
+}
+/* Activity and badges refresh when the page opens. */
+renderAchievements();
+/* Universal tap feedback for cards and buttons is optional and respects device settings. */
+
 })();
