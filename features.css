@@ -176,3 +176,19 @@ body.focus-reading #surahContent{font-size:1.15em}
 .feature-card:focus-within,.feature-item:focus-within{border-color:var(--gold)}
 body[data-festival="friday"] .hero{border-color:#6d9e76;box-shadow:0 0 18px #479b6040}
 body[data-festival="ramadan"] .hero,body[data-festival="eid"] .hero{border-color:#d8b56d;box-shadow:0 0 22px #d8b56d25}
+
+/* Study games and prohibition encyclopedia */
+.game-options{display:grid;gap:8px;margin:12px 0}
+.game-choice{width:100%;text-align:right;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);line-height:1.7}
+.game-choice:focus,.game-choice:hover{border-color:var(--gold);box-shadow:0 0 0 2px #d8b56d22}
+.prohibition-categories{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.prohibition-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:right;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);margin:7px 0}
+.prohibition-item small{color:var(--muted)}
+.prohibition-item span{font-size:12px;color:var(--gold)}
+.prohibition-detail[hidden]{display:none}
+.prohibition-detail{position:fixed;inset:0;z-index:30;background:#000a;display:grid;place-items:center;padding:16px}
+.prohibition-dialog{width:min(680px,100%);max-height:85vh;overflow:auto;padding:20px;border:1px solid var(--accent2);border-radius:20px;background:var(--panel);box-shadow:0 20px 60px #0008}
+.prohibition-dialog h3{color:var(--gold);font-size:22px}
+.prohibition-dialog h4{color:var(--gold);margin:18px 0 5px}
+.prohibition-dialog p{line-height:1.95}
+@media(max-width:720px){.prohibition-item{align-items:flex-start;flex-direction:column}.prohibition-dialog{max-height:88vh}}
