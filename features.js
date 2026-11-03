@@ -40,6 +40,7 @@ extraNav.forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.
 all('.feature-page [data-open]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.open)));
 const homeTiles=$('.tiles');
 if(homeTiles)homeTiles.insertAdjacentHTML('beforeend','<button class="tile" data-go="prayer"><span class="ico">◷</span><span>الصلاة والأذان</span></button><button class="tile" data-go="library"><span class="ico">▤</span><span>المكتبة</span></button><button class="tile" data-go="favorites"><span class="ico">♡</span><span>المفضلة</span></button><button class="tile" data-go="tools"><span class="ico">✧</span><span>الأدوات</span></button>');
+document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go){e.preventDefault();window.openSection(go.dataset.go)}},true);
 const homePrayer=$('#prayerTimes')?.closest('.card');
 if(homePrayer)homePrayer.insertAdjacentHTML('beforeend','<div class="countdown-box"><div><div class="muted" id="homeNextLabel">الصلاة القادمة</div><div class="countdown-time" id="prayerCountdownHome">--:--:--</div></div><button class="feature-btn" data-go="prayer">إعدادات الصلاة</button></div>');
 all('[data-go]').forEach(b=>b.addEventListener('click',()=>window.openSection(b.dataset.go)));
@@ -537,7 +538,8 @@ async function seasonalDecor(){
  try{const r=await fetch('https://api.aladhan.com/v1/gToH');if(r.ok)hijri=(await r.json()).data.hijri}catch(e){}
  const month=Number(hijri?.month?.number||0),day=Number(hijri?.day||0);
  let info=null;
- if(month===9){info={tag:'رمضان كريم',title:'رمضان المبارك',message:'اجعل يومك عامراً بالقرآن والذكر والصدقة وصلة الرحم.',actions:[['ورد القرآن','quran'],['أذكار اليوم','adhkar']]};}
+ if(month===9&&day>=21){info={tag:'العشر الأواخر',title:'العشر الأواخر من رمضان',message:'اجتهد في القيام والقرآن والدعاء، ولا تجزم بليلة القدر في ليلة بعينها.',actions:[['ورد القرآن','quran'],['دعاء العفو','adhkar']]};}
+ else if(month===9){info={tag:'رمضان كريم',title:'رمضان المبارك',message:'اجعل يومك عامراً بالقرآن والذكر والصدقة وصلة الرحم.',actions:[['ورد القرآن','quran'],['أذكار اليوم','adhkar']]};}
  else if(month===10&&day===1){info={tag:'عيد مبارك',title:'عيد الفطر المبارك',message:'تقبل الله منا ومنكم صالح الأعمال.',actions:[['بطاقة تهنئة','greeting'],['التكبيرات','takbeer']]};}
  else if(month===12&&day===10){info={tag:'عيد مبارك',title:'عيد الأضحى المبارك',message:'كل عام وأنتم بخير، تقبل الله الطاعات.',actions:[['بطاقة تهنئة','greeting'],['التكبيرات','takbeer']]};}
  else if(month===12&&day===9){info={tag:'يوم عرفة',title:'يوم عرفة',message:'أكثر من الدعاء والذكر، وتحقق من إعلان بلدك بشأن اليوم.',actions:[['الأذكار','adhkar']]};}
@@ -642,5 +644,57 @@ if(typeof window.loadSurah==='function'){
 /* Activity and badges refresh when the page opens. */
 renderAchievements();
 /* Universal tap feedback for cards and buttons is optional and respects device settings. */
+
+/* Sun arc follows the same elapsed-prayer percentage as the progress bar. */
+function addSunArc(el,id){
+ if(!el||el.querySelector('.sun-arc'))return;
+ el.insertAdjacentHTML('beforeend','<svg class="sun-arc" id="'+id+'SunArc" viewBox="0 0 260 66" aria-label="قوس حركة الوقت بين الصلاتين"><path d="M18 55 Q130 -26 242 55"/><path class="sun-path" d="M18 55 Q130 -26 242 55" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/><circle id="'+id+'SunDot" cx="18" cy="55" r="5"/></svg>');
+}
+addSunArc(prayerCountdown,'prayerCountdown');addSunArc(homeCountdown,'prayerCountdownHome');
+const oldSunRefresh=refreshPrayer;
+refreshPrayer=function(){
+ oldSunRefresh();
+ const t=nextPrayer();if(!t)return;
+ const keys=['Fajr','Dhuhr','Asr','Maghrib','Isha'],i=keys.indexOf(t.key),prev=keys[(i+4)%5],[ph,pm]=timings[prev].split(':').map(Number);
+ const start=new Date(t.date);start.setHours(ph,pm,0,0);if(prev==='Isha'&&t.key==='Fajr')start.setDate(start.getDate()-1);
+ const pct=Math.max(0,Math.min(100,(Date.now()-start)/Math.max(1,t.date-start)*100)),q=pct/100;
+ const x=18+224*q,y=55-81*q*(1-q)*4/1.0;
+ ['prayerCountdown','prayerCountdownHome'].forEach(id=>{
+  const dot=$('#'+id+'SunDot'),path=$('#'+id+'SunArc .sun-path');
+  if(dot){dot.setAttribute('cx',x.toFixed(1));dot.setAttribute('cy',y.toFixed(1))}
+  if(path)path.style.strokeDashoffset=String(100-pct);
+ });
+};
+/* Approximate word-follow highlight for a single-ayah audio track; timing is not an authored recitation transcript. */
+const audioTools=$('#readerTools');
+if(audioTools&&!$('#audioSyncLine'))audioTools.insertAdjacentHTML('afterbegin','<div class="audio-sync"><small>متابعة الكلمات أثناء الصوت · توقيت تقريبي</small><div id="audioSyncLine"></div></div>');
+let activeAudioVerseEl=null;
+$('#surahContent')?.addEventListener('click',e=>{const b=e.target.closest('[data-play-ayah]');if(b)activeAudioVerseEl=b.closest('.verse')},true);
+player?.addEventListener('timeupdate',()=>{
+ if(!activeAudioVerseEl||!Number.isFinite(player.duration)||player.duration<=0)return;
+ const words=(activeAudioVerseEl.childNodes[0]?.textContent||'').trim().split(/\s+/).filter(Boolean);
+ if(!words.length)return;
+ const weights=words.map(w=>Math.max(1,w.replace(/[،؛.!؟]/g,'').length)),total=weights.reduce((a,b)=>a+b,0),position=player.currentTime/player.duration*total;
+ let passed=0,current=0;for(let i=0;i<weights.length;i++){if(position>=passed&&position<passed+weights[i]){current=i;break}passed+=weights[i]}
+ $('#audioSyncLine').innerHTML=words.map((w,i)=>'<span class="'+(i===current?'audio-word-active':'')+'"></span>').join('');
+ words.forEach((w,i)=>$('#audioSyncLine').children[i].textContent=w+' ');
+});
+player?.addEventListener('ended',()=>{activeAudioVerseEl=null;$('#audioSyncLine').textContent=''});
+/* Make the camera preview carry a compass arrow overlay, not a fictional 3D Kaaba. */
+const cam=$('#qiblaCamera');
+if(cam){
+ const wrap=document.createElement('div');wrap.className='camera-radar-wrap';cam.parentNode.insertBefore(wrap,cam);wrap.appendChild(cam);
+ wrap.insertAdjacentHTML('beforeend','<div id="cameraQiblaOverlay" class="camera-qibla-overlay">↑</div>');
+}
+const oldCompassUpdate=compassUpdate;
+compassUpdate=function(){oldCompassUpdate();const degree=Number($('#qiblaDegree')?.textContent.replace('°',''));if(heading!==null&&Number.isFinite(degree)&&$('#cameraQiblaOverlay'))$('#cameraQiblaOverlay').style.transform='translate(-50%,-50%) rotate('+(degree-heading)+'deg)'};
+/* 3D bead rope can be rotated by finger drag. */
+const beadRope=$('#beadRope');let beadDragX=null,beadRotation=0;
+beadRope?.addEventListener('pointerdown',e=>{beadDragX=e.clientX;beadRope.setPointerCapture?.(e.pointerId)});
+beadRope?.addEventListener('pointermove',e=>{if(beadDragX===null)return;beadRotation+=(e.clientX-beadDragX)*.7;beadDragX=e.clientX;beadRope.style.transform='rotateY('+beadRotation+'deg) rotateX(8deg)'});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>beadRope?.addEventListener(ev,()=>{beadDragX=null}));
+/* Daily tree uses the real local activity count, not a fabricated global rank. */
+const lastReadBadgeNote=$('#treeMessage');
+if(lastReadBadgeNote)lastReadBadgeNote.title='النشاط محفوظ على هذا الجهاز فقط';
 
 })();
