@@ -157,8 +157,8 @@ async function renderStats(){
 $('#refreshStats')?.addEventListener('click',renderStats);renderStats();
 /* Prayer methods and notifications. Tunisia's method is selectable, not forced. */
 const cities={Tunis:[36.8065,10.1815],Sfax:[34.7406,10.7603],Sousse:[35.8256,10.63699],Kairouan:[35.6781,10.0963],Bizerte:[37.2744,9.8739],Gabes:[33.8815,10.0982],Gafsa:[34.425,8.7842],Medenine:[33.3549,10.5055]};
-let prayerCoords=null,timings=null,minutes=5,lastNotice='',adhanBlob=null,adhanUrl=null;
-async function loadPrayer(lat,lon){prayerCoords={lat:Number(lat),lon:Number(lon)};const method=Number($('#prayerMethod')?.value||18);$('#prayerPageStatus').textContent='جارٍ حساب المواقيت…';try{const r=await fetch('https://api.aladhan.com/v1/timings?latitude='+lat+'&longitude='+lon+'&method='+method);if(!r.ok)throw Error();const j=await r.json();timings=j.data.timings;window.prayerTimesData=timings;const k=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];$('#prayerTimes').innerHTML=k.map(a=>'<div class="prayer"><span>'+a[0]+'</span><b>'+timings[a[1]]+'</b></div>').join('');$('#locationLabel').textContent=j.data.meta.timezone||'الموقع المختار';$('#prayerStatus').textContent='المواقيت محسوبة بطريقة '+method+'. تحقق من التوقيت المحلي لمسجدك.';$('#prayerPageStatus').textContent='تم تحديث المواقيت · '+(j.data.date?.readable||'اليوم');$('#prayerMethodLabel').textContent='طريقة الحساب: '+method;refreshPrayer();return true}catch(e){$('#prayerPageStatus').textContent='تعذر تحميل المواقيت. تحقق من الاتصال.';return false}}
+let prayerCoords=null,timings=null,minutes=5,lastNotice='',adhanBlob=null,adhanUrl=null,prayerIsFallback=true;
+async function loadPrayer(lat,lon){prayerIsFallback=false;prayerCoords={lat:Number(lat),lon:Number(lon)};const method=Number($('#prayerMethod')?.value||18);$('#prayerPageStatus').textContent='جارٍ حساب المواقيت…';try{const r=await fetch('https://api.aladhan.com/v1/timings?latitude='+lat+'&longitude='+lon+'&method='+method);if(!r.ok)throw Error();const j=await r.json();timings=j.data.timings;window.prayerTimesData=timings;const k=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];$('#prayerTimes').innerHTML=k.map(a=>'<div class="prayer"><span>'+a[0]+'</span><b>'+timings[a[1]]+'</b></div>').join('');$('#locationLabel').textContent=j.data.meta.timezone||'الموقع المختار';$('#prayerStatus').textContent='المواقيت محسوبة بطريقة '+method+'. تحقق من التوقيت المحلي لمسجدك.';$('#prayerPageStatus').textContent='تم تحديث المواقيت · '+(j.data.date?.readable||'اليوم');$('#prayerMethodLabel').textContent='طريقة الحساب: '+method;refreshPrayer();return true}catch(e){$('#prayerPageStatus').textContent='تعذر تحميل المواقيت. تحقق من الاتصال.';return false}}
 window.loadPrayer=loadPrayer;
 function nextPrayer(){if(!timings)return null;const k=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']],now=new Date();for(const [name,key] of k){const [h,m]=timings[key].split(':').map(Number),d=new Date();d.setHours(h,m,0,0);if(d>now)return {name,key,date:d}}const [h,m]=timings.Fajr.split(':').map(Number),d=new Date();d.setDate(d.getDate()+1);d.setHours(h,m,0,0);return {name:'الفجر',key:'Fajr',date:d}}
 function refreshPrayer(){const t=nextPrayer();if(!t)return;const n=Math.max(0,Math.floor((t.date-new Date())/1000)),s=String(n%60).padStart(2,'0'),m=String(Math.floor(n/60)%60).padStart(2,'0'),h=String(Math.floor(n/3600)).padStart(2,'0');$('#nextPrayerName').textContent=t.name;$('#homeNextLabel').textContent='الصلاة القادمة: '+t.name;$('#prayerCountdown').textContent=h+':'+m+':'+s;$('#prayerCountdownHome').textContent=h+':'+m+':'+s;$('#nextPrayer').textContent=t.name+' '+timings[t.key]}
@@ -179,7 +179,7 @@ readLocal('adhanAudio',null).then(f=>{if(f instanceof Blob){adhanBlob=f;adhanUrl
 $('#testAdhan')?.addEventListener('click',()=>adhanBlob?$('#adhanPreview').play().catch(()=>{}):playAdhan());
 $('#clearAdhan')?.addEventListener('click',()=>{adhanBlob=null;$('#adhanPreview').removeAttribute('src');$('#adhanFile').value='';saveLocal('adhanAudio',null);toast('تمت إزالة الملف')});
 function refreshPrayerPage(){if(prayerCoords)refreshPrayer()}
-if(!window.userCoords)loadPrayer(...cities.Tunis);
+if(!window.userCoords){prayerIsFallback=true;loadPrayer(...cities.Tunis).then(()=>{prayerIsFallback=true})}
 /* Compass heading sensor. */
 const qb=$('#qibla .card');
 if(qb)qb.insertAdjacentHTML('afterbegin','<div class="compass-face"><span class="compass-north">الشمال</span><div id="compassArrow" class="compass-arrow">↑</div></div><div class="feature-actions" style="justify-content:center"><button id="enableCompassBtn" class="feature-btn">تفعيل بوصلة الهاتف</button></div><p id="compassStatus" class="feature-note center">لا تتوفر حساسات الاتجاه في كل الأجهزة.</p>');
@@ -288,12 +288,12 @@ $('#saveBookmarkBtn')?.removeEventListener('click',bookmark);
 $('#saveBookmarkBtn')?.addEventListener('click',savePreciseBookmark);
 refreshContinueCard();
 /* Prayer interval progress and edge glow at the actual prayer time. */
-function ensureProgress(el){
+function ensureProgress(el,id){
  if(!el||el.querySelector('.prayer-progress-track'))return;
- el.insertAdjacentHTML('beforeend','<div class="prayer-progress-track"><div id="'+(el.id||'prayer')+'ProgressFill" class="prayer-progress-fill"></div></div><div class="prayer-progress-meta"><span id="'+(el.id||'prayer')+'ProgressLabel">الوقت المنقضي</span><span id="'+(el.id||'prayer')+'ProgressPercent">0%</span></div>');
+ el.insertAdjacentHTML('beforeend','<div class="prayer-progress-track"><div id="'+id+'ProgressFill" class="prayer-progress-fill"></div></div><div class="prayer-progress-meta"><span id="'+id+'ProgressLabel">الوقت المنقضي</span><span id="'+id+'ProgressPercent">0%</span></div>');
 }
 const prayerCountdown=$('#prayerCountdown')?.closest('.countdown-box'),homeCountdown=$('#prayerCountdownHome')?.closest('.countdown-box');
-ensureProgress(prayerCountdown);ensureProgress(homeCountdown);
+ensureProgress(prayerCountdown,'prayerCountdown');ensureProgress(homeCountdown,'prayerCountdownHome');
 const oldRefresh=refreshPrayer;
 refreshPrayer=function(){
  oldRefresh();
@@ -311,7 +311,7 @@ const previousTasbihHandler=$('#countBtn')?.onclick;
 if($('#countBtn'))$('#countBtn').onclick=function(e){
  if(previousTasbihHandler)previousTasbihHandler.call(this,e);
  const c=Number($('#count').textContent)||0;
- if(navigator.vibrate){if(c%100===0)navigator.vibrate([70,45,110]);else if(c%33===0)navigator.vibrate([35,25,55]);else navigator.vibrate(12)}
+ if(navigator.vibrate){if(c%100===0)navigator.vibrate([70,45,110]);else if(c%33===0)navigator.vibrate([35,25,55])}
  if(c>0&&c%33===0&&c%100!==0)toast('أكملت '+c+' تسبيحة');
 };
 /* One-tap share action on every verse. */
@@ -383,7 +383,7 @@ $('#travelDistanceBtn')?.addEventListener('click',()=>{
 });
 $('#nearbyMosquesBtn')?.addEventListener('click',async()=>{
  const out=$('#nearbyMosquesList');out.innerHTML='<p class="muted">جارٍ البحث ضمن نطاق 5 كم…</p>';
- let coords=window.userCoords||prayerCoords;
+ let coords=window.userCoords||null;
  if(!coords&&navigator.geolocation){try{const p=await new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(ok,no,{enableHighAccuracy:true,timeout:12000}));coords={lat:p.coords.latitude,lon:p.coords.longitude}}catch(e){}}
  if(!coords){out.textContent='اسمح بالموقع أو اختر مدينة في صفحة الصلاة.';return}
  const q='[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="muslim"](around:5000,'+coords.lat+','+coords.lon+');way["amenity"="place_of_worship"]["religion"="muslim"](around:5000,'+coords.lat+','+coords.lon+');node["building"="mosque"](around:5000,'+coords.lat+','+coords.lon+');way["building"="mosque"](around:5000,'+coords.lat+','+coords.lon+'););out center tags;';
@@ -439,6 +439,7 @@ const wordMeanings={
 function sheetOpen(data){
  sheetContext=data;$('#knowledgeTitle').textContent=data.title||'شرح المحتوى';$('#knowledgeSource').textContent=data.source||'';
  $('#knowledgeSheet').hidden=false;$('#knowledgeShade').hidden=false;document.body.classList.add('sheet-open');
+ $('#knowledgeTabs [data-sheet-tab="words"]').hidden=false;$('#knowledgeTabs [data-sheet-tab="reason"]').hidden=false;$('#knowledgeTabs [data-sheet-tab="reason"]').textContent='سبب النزول / المصدر';
  all('#knowledgeTabs button').forEach(b=>b.classList.toggle('active',b.dataset.sheetTab==='meaning'));
  renderSheetTab('meaning');if(navigator.vibrate)navigator.vibrate(16);
 }
@@ -506,8 +507,8 @@ const hadithMeanings=[
 ];
 $('#hadithList')?.addEventListener('click',e=>{
  const el=e.target.closest('.feature-item');if(!el||e.target.closest('button'))return;
- const i=[...$('#hadithList').children].indexOf(el),h=hadiths[i];if(!h)return;
- sheetOpen({kind:'hadith',title:'شرح الحديث',source:h[1]+' · '+h[2],text:h[0],meaning:hadithMeanings[i]||'اقرأ الحديث مع مصدره وارجع إلى شروحه المعتمدة.',note:'المصدر والترقيم كما هو معروض في البطاقة، وقد تختلف أرقام الأحاديث بين الطبعات.'});
+ const text=el.querySelector('p')?.textContent?.replace(/^«|»$/g,'')||'',source=el.querySelector('small')?.textContent||'',h=hadiths.find(x=>x[0]===text);if(!h)return;
+ sheetOpen({kind:'hadith',title:'شرح الحديث',source:source+' · '+h[2],text:h[0],meaning:hadithMeanings[hadiths.indexOf(h)]||'اقرأ الحديث مع مصدره وارجع إلى شروحه المعتمدة.',note:'المصدر والترقيم كما هو معروض في البطاقة، وقد تختلف أرقام الأحاديث بين الطبعات.'});
  $('#knowledgeActions').innerHTML='<button class="feature-btn" data-sheet-action="copy">نسخ الحديث</button><button class="feature-btn primary" data-sheet-action="share">مشاركة</button>';
 });
 $('#adhkarList')?.addEventListener('click',e=>{
