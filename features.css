@@ -213,3 +213,80 @@ body.serenity-mode #hub .hub-grid .feature-card:not(:last-child){display:none}
 body.serenity-mode #hub .section-head{display:none}
 body.serenity-mode #serenityVerse{font-size:clamp(28px,5vw,52px);padding:15vh 5vw;line-height:2.1;color:var(--gold)}
 @media(max-width:720px){.hub-grid{grid-template-columns:1fr}.juz-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* High-contrast Quran word meanings: keep Uthmani Arabic readable in every theme. */
+#knowledgeSheet #sheetWordChips{
+  direction:rtl;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin:14px 0;
+}
+#knowledgeSheet #sheetWordChips button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:46px;
+  padding:9px 14px;
+  border:1px solid #c7a45e;
+  border-radius:13px;
+  background:#183b30;
+  color:#fffdf3;
+  font-family:"Noto Naskh Arabic","Amiri","Scheherazade New",Tahoma,serif;
+  font-size:21px;
+  font-weight:600;
+  line-height:1.9;
+  text-align:center;
+  direction:rtl;
+  unicode-bidi:plaintext;
+  cursor:pointer;
+  box-shadow:0 2px 8px #0003;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+#knowledgeSheet #sheetWordChips button:hover,
+#knowledgeSheet #sheetWordChips button:focus-visible{
+  background:#285744;
+  border-color:#f0cf82;
+  color:#fff;
+  outline:2px solid #f0cf82;
+  outline-offset:2px;
+}
+#knowledgeSheet #sheetWordChips button:active{transform:scale(.97)}
+#knowledgeSheet #sheetWordMeaning{
+  min-height:64px;
+  padding:16px;
+  border:1px solid #b99654;
+  border-radius:14px;
+  background:#102b22;
+  color:#fffdf3;
+  font-size:16px;
+  line-height:2;
+  font-weight:500;
+}
+:root[data-theme="light"] #knowledgeSheet #sheetWordChips button{
+  background:#f5f1e5;
+  color:#172d24;
+  border-color:#9a793b;
+}
+:root[data-theme="light"] #knowledgeSheet #sheetWordChips button:hover,
+:root[data-theme="light"] #knowledgeSheet #sheetWordChips button:focus-visible{
+  background:#e6eddf;
+  color:#10251d;
+  border-color:#76591f;
+}
+:root[data-theme="light"] #knowledgeSheet #sheetWordMeaning{
+  background:#f5f1e5;
+  color:#172d24;
+  border-color:#9a793b;
+}
+:root[data-theme="oled"] #knowledgeSheet #sheetWordChips button{
+  background:#111;
+  color:#fff;
+  border-color:#b99654;
+}
+:root[data-theme="oled"] #knowledgeSheet #sheetWordMeaning{
+  background:#090909;
+  color:#fff;
+  border-color:#b99654;
+}
